@@ -1,0 +1,24 @@
+# Site settings
+title: Solace Samples NodeJS
+baseurl: "/solace-samples-nodejs" # the subpath of your site, e.g. /solace-samples-java
+repository: https://github.com/SolaceSamples/solace-samples-nodejs
+
+# Also see _includes/intro.html to customize the description which gets included in index.html.
+
+# Links
+docs-vmr-setup: http://docs.solace.com/Solace-VMR-Set-Up/Setting-Up-VMRs.htm
+
+#----------------------------------------------------
+# Generally don't modify items below this point
+url: "solacesamples.github.io" # the base hostname & protocol for your site
+
+# Google services
+google_analytics: UA-3921398-7
+
+# Build settings
+markdown: kramdown
+
+collections:
+  tutorials:
+    output: true
+    permalink: /:path/
