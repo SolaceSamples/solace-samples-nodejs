@@ -6,7 +6,11 @@ repository: https://github.com/SolaceSamples/solace-samples-nodejs
 # Also see _includes/intro.html to customize the description which gets included in index.html.
 
 # Links
+links-downloads: http://dev.solace.com/downloads/
 docs-vmr-setup: http://docs.solace.com/Solace-VMR-Set-Up/Setting-Up-VMRs.htm
+docs-core-concepts: http://docs.solace.com/Features/Core-Concepts.htm
+docs-session-events: http://docs.solace.com/Solace-Messaging-APIs/Creating-Client-Sessions-1.htm#Handle-Sess-Events
+
 
 #----------------------------------------------------
 # Generally don't modify items below this point
