@@ -1,6 +1,35 @@
-# Solace Samples NodeJS
+# Getting Started Examples
+## Solace Node.js API
 
-TODO
+These tutorials will get you up to speed and sending messages with Solace technology as quickly as possible. There are two ways you can get started:
+
+- If your company has Solace message routers deployed, contact your middleware team to obtain the host name or IP address of a Solace message router to test against, a username and password to access it, and a VPN in which you can produce and consume messages.
+- If you do not have access to a Solace message router, you will need to go through the “[Set up a VMR](http://docs.solace.com/Solace-VMR-Set-Up/Setting-Up-VMRs.htm)” tutorial to download and install the software.
+
+## Contents
+
+This repository contains code and matching tutorial walk throughs for five different basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
+
+## Checking out and Building
+
+To check out the project and build it, do the following:
+
+  1. clone this GitHub repository
+  1. `cd solace-samples-nodejs`
+ 
+### Download the Solace JavaScript API
+
+The Solace Node.js API library can be [downloaded here](http://dev.solace.com/downloads/).  The instructions in this tutorial assume you have downloaded the Web Messaging API for JavaScript library and unpacked it to a known location. The samples assume a `lib` subdirectory within each samples directory. For example `src/lib`.
+
+## Running the Samples
+
+The samples are found in the `src` directory.
+
+You run the sample using node. For example:
+
+    node TopicPublisher.js <HOST>
+
+See the [tutorials](https://solacesamples.github.io/solace-samples-nodejs/) for more details.
 
 ## Contributing
 
