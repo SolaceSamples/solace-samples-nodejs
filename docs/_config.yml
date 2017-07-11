@@ -1,5 +1,5 @@
 # Site settings
-title: Solace Samples NodeJS
+title: Solace Samples Node.js
 baseurl: "/solace-samples-nodejs" # the subpath of your site, e.g. /solace-samples-java
 repository: https://github.com/SolaceSamples/solace-samples-nodejs
 
