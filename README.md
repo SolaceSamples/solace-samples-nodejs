@@ -19,11 +19,17 @@ To check out the project and build it, do the following:
  
 ### Download the Solace JavaScript API
 
-The Solace Node.js API library can be [downloaded here](http://dev.solace.com/downloads/).  The instructions in this tutorial assume you have downloaded the Web Messaging API for JavaScript library and unpacked it to a known location. The samples assume a `lib` subdirectory within each samples directory. For example `src/lib`.
+The Solace Node.js API library can be [downloaded here](http://dev.solace.com/downloads/).  The instructions in this tutorial assume you have downloaded the Web Messaging API for Node.js API library and unpacked it to a known location.
+
+For a local installation of the API package, run from the current `src/basic-samples` directory:
+
+```
+npm install <path_to_tarball_directory>/node-solclientjs-<version>.tar.gz 
+```
 
 ## Running the Samples
 
-The samples are found in the `src` directory.
+The samples are found in the `src/basic-samples` directory.
 
 You run the sample using node. For example:
 
