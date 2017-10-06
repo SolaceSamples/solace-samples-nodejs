@@ -220,8 +220,7 @@ The actual method calls to create and send persistent messages to a queue is lik
 ```JavaScript
 var messageText = 'Sample Message';
 var message = solace.SolclientFactory.createMessage();
-message.setDestination(
-    solace.SolclientFactory.createDestination(solace.DestinationType.QUEUE, producer.queueName));
+message.setDestination(new solace.Destination(producer.queueName, solace.DestinationType.QUEUE));
 message.setBinaryAttachment(messageText);
 message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
 try {
@@ -245,8 +244,7 @@ Receiving persistent messages is different from the direct messaging case descri
 To receive persistent messages, a `SubscriberFlow` object needs to be created and connected so it will bind to the destination queue and can start receiving messages.
 
 ```JavaScript
-consumer.destination = solace.SolclientFactory.createDestination(
-    solace.DestinationType.QUEUE, consumer.queueName);
+consumer.destination = new solace.Destination(consumer.queueName, solace.DestinationType.QUEUE);
 // Create a flow
 consumer.flow = consumer.session.createSubscriberFlow(new solace.SubscriberFlowProperties({
     endpoint: {

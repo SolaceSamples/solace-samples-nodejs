@@ -149,7 +149,7 @@ factoryProps.profile = solace.SolclientFactoryProfiles.version10;
 solace.SolclientFactory.init(factoryProps);
 
 // enable logging to JavaScript console at WARN level
-// NOTICE: works only with "solclientjs-debug"
+// NOTICE: works only with ('solclientjs').debug
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the publisher, specifying the name of the subscription topic

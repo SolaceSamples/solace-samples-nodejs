@@ -19,8 +19,8 @@
 
 /**
  * Solace Systems Node.js API
- * Persistence with Queues tutorial - Queue Consumer
- * Demonstrates receiving persistent messages from a queue
+ * Client Ack tutorial - Queue Consumer
+ * Demonstrates acknowledging persistent messages by the application
  */
 
 /*jslint es6 node:true devel:true*/
@@ -118,6 +118,7 @@ var QueueConsumer = function (solaceModule, queueName) {
                         endpoint: {
                             destination: consumer.queueDestination,
                         },
+                        acknowledgeMode: solace.SubscriberFlowAcknowledgeMode.CLIENT, // Enabling Client ack
                     }));
                     // Define flow event listeners
                     consumer.flow.on(solace.FlowEventName.UP, function () {
@@ -135,8 +136,10 @@ var QueueConsumer = function (solaceModule, queueName) {
                     });
                     // Define message event listener
                     consumer.flow.on(solace.FlowEventName.MESSAGE, function (message) {
-                        consumer.log('Received message: "' + message.getBinaryAttachment() + '",' +
-                            ' details:\n' + message.dump());
+                        consumer.log('Received message: "' + message.getBinaryAttachment());
+                        // Need to explicitly ack otherwise it will not be deleted from the message router
+                        message.acknowledge();
+                        consumer.log('Acknowledged message from the application.');
                     });
                     // Connect the flow
                     consumer.flow.connect();

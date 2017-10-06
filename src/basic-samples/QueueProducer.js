@@ -104,8 +104,7 @@ var QueueProducer = function (solaceModule, queueName) {
             var messageText = 'Sample Message';
             var message = solace.SolclientFactory.createMessage();
             producer.log('Sending message "' + messageText + '" to queue "' + producer.queueName + '"...');
-            message.setDestination(
-                solace.SolclientFactory.createDestination(solace.DestinationType.QUEUE, producer.queueName));
+            message.setDestination(new solace.Destination(producer.queueName, solace.DestinationType.QUEUE));
             message.setBinaryAttachment(messageText);
             message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
             try {
@@ -151,7 +150,7 @@ factoryProps.profile = solace.SolclientFactoryProfiles.version10;
 solace.SolclientFactory.init(factoryProps);
 
 // enable logging to JavaScript console at WARN level
-// NOTICE: works only with "solclientjs-debug"
+// NOTICE: works only with ('solclientjs').debug
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the producer, specifying the name of the destination queue

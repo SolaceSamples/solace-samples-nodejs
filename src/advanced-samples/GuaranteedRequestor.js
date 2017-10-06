@@ -19,18 +19,20 @@
 
 /**
  * Solace Systems Node.js API
- * Request/Reply tutorial - Basic Requestor
- * Demonstrates sending a request and receiving a reply
+ * Guaranteed Request/Reply tutorial - Guaranteed Requestor
+ * Demonstrates how to send a guaranteed request message and
+ * waits to receive a reply message as a response.
  */
 
 /*jslint es6 devel:true node:true*/
 
-var BasicRequestor = function (solaceModule, topicName) {
+var GuaranteedRequestor = function (solaceModule, requestQueueName) {
     'use strict';
     var solace = solaceModule;
     var requestor = {};
     requestor.session = null;
-    requestor.topicName = topicName;
+    requestor.requestQueueName = requestQueueName;
+    requestor.correlationID = null;
 
     // Logger
     requestor.log = function (line) {
@@ -98,42 +100,48 @@ var BasicRequestor = function (solaceModule, topicName) {
     // sends one request
     requestor.request = function () {
         if (requestor.session !== null) {
-            var requestText = 'Sample Request';
-            var request = solace.SolclientFactory.createMessage();
-            requestor.log('Sending request "' + requestText + '" to topic "' + requestor.topicName + '"...');
-            request.setDestination(solace.SolclientFactory.createTopic(requestor.topicName));
-            request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, requestText));
-            request.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
-            try {
-                requestor.session.sendRequest(
-                    request,
-                    5000, // 5 seconds timeout for this operation
-                    function (session, message) {
-                        requestor.replyReceivedCb(session, message);
-                    },
-                    function (session, event) {
-                        requestor.requestFailedCb(session, event);
-                    },
-                    null // not providing correlation object
-                );
-            } catch (error) {
-                requestor.log(error.toString());
-            }
+            // creates a temporary queue to listen to responses
+            var replyToQueue = requestor.session.createTemporaryQueue();
+            // creates a flow to this queue
+            var flow = requestor.session.createSubscriberFlow({
+                endpoint: {destination: replyToQueue,
+                    durable: solace.EndpointDurability.NON_DURABLE_GUARANTEED,
+                    permissions: solace.EndpointPermissions.DELETE,}
+            });
+            // send the request when the listening flow is up
+            flow.on(solace.FlowEventName.UP, function onMessage(message) {
+                var msg = solace.SolclientFactory.createMessage();
+                const requestText = "Sample Request";
+                requestor.log('Sending request "' + requestText + '" to request queue "' + requestor.requestQueueName + '"...');
+                msg.setDestination(new solace.Destination(requestor.requestQueueName, solace.DestinationType.QUEUE));
+                msg.setBinaryAttachment(requestText);
+                msg.setReplyTo(replyToQueue);
+                requestor.correlationID = 'MyCorrelationID'
+                msg.setCorrelationId(requestor.correlationID);
+                msg.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
+                requestor.session.send(msg);
+            });
+            // process the response received at the replyToQueue
+            flow.on(solace.FlowEventName.MESSAGE, function onMessage(message) {
+                if (message.getCorrelationId() === requestor.correlationID) {
+                    requestor.log('Received reply: "' + message.getBinaryAttachment() + '", details:\n' + message.dump());
+                } else {
+                    requestor.log(`Received reply but correlation ID didn't match: "` + message.getBinaryAttachment() +
+                    '",' + ' details:\n' + message.dump());
+                }
+                requestor.exit();
+            });
+            flow.connect();
         } else {
             requestor.log('Cannot send request because not connected to Solace message router.');
         }
     };
 
-    // Callback for replies
-    requestor.replyReceivedCb = function (session, message) {
-        requestor.log('Received reply: "' + message.getSdtContainer().getValue() + '", details:\n' + message.dump());
-        requestor.exit();
-    };
-
-    // Callback for request failures
-    requestor.requestFailedCb = function (session, event) {
-        requestor.log('Request failure: ' + event.toString());
-        requestor.exit();
+    requestor.exit = function () {
+        requestor.disconnect();
+        setTimeout(function () {
+            process.exit();
+        }, 1000); // wait for 1 second to disconnect
     };
 
     // Gracefully disconnects from Solace message router
@@ -148,13 +156,6 @@ var BasicRequestor = function (solaceModule, topicName) {
         } else {
             requestor.log('Not connected to Solace message router.');
         }
-    };
-
-    requestor.exit = function () {
-        requestor.disconnect();
-        setTimeout(function () {
-            process.exit();
-        }, 1000); // wait for 1 second to disconnect
     };
 
     return requestor;
@@ -172,7 +173,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the requestor, specifying the name of the request topic
-var requestor = new BasicRequestor(solace, 'tutorial/topic');
+var requestor = new GuaranteedRequestor(solace, 'tutorial/requestqueue');
 
 // send request to Solace message router
 requestor.run(process.argv);

@@ -19,7 +19,7 @@
 
 /**
  * Solace Systems Node.js API
- * Publish/Subscribe tutorial - Topic Subscriber
+ * Secure Session tutorial - Topic Subscriber
  * Demonstrates subscribing to a topic for direct messages and receiving messages
  */
 
@@ -42,7 +42,7 @@ var TopicSubscriber = function (solaceModule, topicName) {
         console.log(timestamp + line);
     };
 
-    subscriber.log('\n*** Subscriber to topic "' + subscriber.topicName + '" is ready to connect ***');
+    subscriber.log('\n*** Secure Subscriber to topic "' + subscriber.topicName + '" is ready to connect ***');
 
     // main function
     subscriber.run = function (argv) {
@@ -63,15 +63,33 @@ var TopicSubscriber = function (solaceModule, topicName) {
         }
     };
 
-    subscriber.connectToSolace = function (host, username, password, vpn) {
+  subscriber.res = function (arg) {
+    const { resolve } = require('path');
+    return resolve(__dirname, '.', arg);
+  }
+
+  subscriber.connectToSolace = function (host, username, password, vpn) {
         const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        subscriber.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
+        sessionProperties.url = 'wss://' + host;
+        subscriber.log('Connecting to Solace message router using Secure WebSocket transport url wss://' + host);
         sessionProperties.vpnName = vpn;
         subscriber.log('Solace message router VPN name: ' + sessionProperties.vpnName);
         sessionProperties.userName = username;
         subscriber.log('Client username: ' + sessionProperties.userName);
         sessionProperties.password = password;
+        // secure session related session properties
+        sessionProperties.authenticationScheme = solace.AuthenticationScheme.CLIENT_CERTIFICATE;
+        sessionProperties.sslExcludedProtocols = ['TLSv1'];
+        sessionProperties.sslCipherSuites = 'AES128-GCM-SHA256';
+        sessionProperties.sslValidateCertificate = true;
+        sessionProperties.sslTrustStores = [subscriber.res('certs/root_ca-rsa.crt')];
+        sessionProperties.sslTrustedCommonNameList = ['TestServerCN'];
+        // listed for completeness but cannot be used at the same time as
+        // sessionProperties.sslPfx = res('./client_certificates/client-rsa.pfx');
+        // sessionProperties.sslPfxPassword = 'pfx_password';
+        sessionProperties.sslPrivateKey = subscriber.res('certs/client1-rsa-1.key');
+        sessionProperties.sslPrivateKeyPassword = 'key_password';
+        sessionProperties.sslCertificate = subscriber.res('certs/client1-rsa-1.crt');
         // create session
         subscriber.session = solace.SolclientFactory.createSession(sessionProperties);
         // define session event listeners

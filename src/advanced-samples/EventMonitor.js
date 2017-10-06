@@ -19,13 +19,14 @@
 
 /**
  * Solace Systems Node.js API
- * Publish/Subscribe tutorial - Topic Subscriber
- * Demonstrates subscribing to a topic for direct messages and receiving messages
+ * Event Monitor tutorial - Event Subscriber
+ * Demonstrates subscribing to the router event topic for Client
+ * Connect events
  */
 
 /*jslint es6 node:true devel:true*/
 
-var TopicSubscriber = function (solaceModule, topicName) {
+var EventSubscriber = function (solaceModule, topicName) {
     'use strict';
     var solace = solaceModule;
     var subscriber = {};
@@ -101,12 +102,12 @@ var TopicSubscriber = function (solaceModule, topicName) {
             } else {
                 subscriber.subscribed = true;
                 subscriber.log('Successfully subscribed to topic: ' + sessionEvent.correlationKey);
-                subscriber.log('=== Ready to receive messages. ===');
+                subscriber.log('=== Ready to receive events. ===');
             }
         });
         // define message event listener
         subscriber.session.on(solace.SessionEventCode.MESSAGE, (message) => {
-            subscriber.log('Received message: "' + message.getBinaryAttachment() + '", details:\n' + message.dump());
+            subscriber.log('Received Client Connect event: "' + message.getBinaryAttachment());
         });
         // connect the session
         try {
@@ -198,8 +199,8 @@ solace.SolclientFactory.init(factoryProps);
 // NOTICE: works only with ('solclientjs').debug
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
-// create the subscriber, specifying the name of the subscription topic
-var subscriber = new TopicSubscriber(solace, 'tutorial/topic');
+// create the subscriber, specifying the name of the event topic
+var subscriber = new EventSubscriber(solace, '#LOG/INFO/CLIENT/*/CLIENT_CLIENT_CONNECT/>');
 
 // subscribe to messages on Solace message router
 subscriber.run(process.argv);

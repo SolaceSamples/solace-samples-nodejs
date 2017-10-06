@@ -31,7 +31,7 @@ var QueueProducer = function (solaceModule, queueName) {
     var producer = {};
     producer.session = null;
     producer.queueName = queueName;
-    producer.messageCount = 10;
+    producer.numOfMessages = 10;
     producer.messageAckRecvd = 0;
 
     // Logger
@@ -85,7 +85,7 @@ var QueueProducer = function (solaceModule, queueName) {
             producer.log('Delivery of message with correlation key = ' + JSON.stringify(sessionEvent.correlationKey) +
               ' confirmed.');
             producer.messageAckRecvd++;
-            if (producer.messageAckRecvd === producer.messageCount) {
+            if (producer.messageAckRecvd === producer.numOfMessages) {
                 producer.exit();
             }
         });
@@ -93,7 +93,7 @@ var QueueProducer = function (solaceModule, queueName) {
             producer.log('Delivery of message with correlation key = ' + JSON.stringify(sessionEvent.correlationKey) +
                 ' rejected, info: ' + sessionEvent.infoStr);
             producer.messageAckRecvd++;
-            if (producer.messageAckRecvd === producer.messageCount) {
+            if (producer.messageAckRecvd === producer.numOfMessages) {
                 producer.exit();
             }
         });
@@ -117,7 +117,7 @@ var QueueProducer = function (solaceModule, queueName) {
 
     producer.sendMessages = function () {
         if (producer.session !== null) {
-            for (var i = 1; i <= producer.messageCount; i++) {
+            for (var i = 1; i <= producer.numOfMessages; i++) {
                 producer.sendMessage(i);
             }
         } else {
@@ -129,8 +129,7 @@ var QueueProducer = function (solaceModule, queueName) {
     producer.sendMessage = function (sequenceNr) {
         var messageText = 'Sample Message';
         var message = solace.SolclientFactory.createMessage();
-        message.setDestination(
-            solace.SolclientFactory.createDestination(solace.DestinationType.QUEUE, producer.queueName));
+        message.setDestination(new solace.Destination(producer.queueName, solace.DestinationType.QUEUE));
         message.setBinaryAttachment(messageText);
         message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
         // Define a correlation key object
@@ -179,7 +178,7 @@ factoryProps.profile = solace.SolclientFactoryProfiles.version10;
 solace.SolclientFactory.init(factoryProps);
 
 // enable logging to JavaScript console at WARN level
-// NOTICE: works only with "solclientjs-debug"
+// NOTICE: works only with ('solclientjs').debug
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the producer, specifying the name of the destination queue
