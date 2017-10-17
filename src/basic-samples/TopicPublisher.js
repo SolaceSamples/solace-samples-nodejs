@@ -79,9 +79,6 @@ var TopicPublisher = function (solaceModule, topicName) {
             publisher.publish();
             publisher.exit();
         });
-        publisher.session.on(solace.SessionEventCode.CONNECTING, (sessionEvent) => {
-            publisher.log('Connecting...');
-        });
         publisher.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
             publisher.log('Disconnected.');
             if (publisher.session !== null) {

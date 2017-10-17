@@ -80,10 +80,6 @@ var EventSubscriber = function (solaceModule, topicName) {
             subscriber.log('=== Successfully connected and ready to subscribe. ===');
             subscriber.subscribe();
         });
-        subscriber.session.on(solace.SessionEventCode.CONNECTING, function (sessionEvent) {
-            subscriber.log('Connecting...');
-            subscriber.subscribed = false;
-        });
         subscriber.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             subscriber.log('Disconnected.');
             subscriber.subscribed = false;

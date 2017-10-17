@@ -97,9 +97,6 @@ var QueueProducer = function (solaceModule, queueName) {
                 producer.exit();
             }
         });
-        producer.session.on(solace.SessionEventCode.CONNECTING, (sessionEvent) => {
-            producer.log('Connecting...');
-        });
         producer.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
             producer.log('Disconnected.');
             if (producer.session !== null) {
