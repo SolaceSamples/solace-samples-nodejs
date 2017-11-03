@@ -8,6 +8,7 @@ repository: https://github.com/SolaceSamples/solace-samples-nodejs
 
 # Links
 links-downloads: http://dev.solace.com/downloads/
+links-solaceCloud-setup: http://cloud.solace.com/create-messaging-service/
 docs-vmr-setup: http://docs.solace.com/Solace-VMR-Set-Up/Setting-Up-VMRs.htm
 docs-core-concepts: http://docs.solace.com/Features/Core-Concepts.htm
 docs-session-events: http://docs.solace.com/Solace-Messaging-APIs/Creating-Client-Sessions-1.htm#Handle-Sess-Events
