@@ -12,9 +12,6 @@ This tutorial outlines both roles in the request-response message exchange patte
 This tutorial assumes the following:
 
 *   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
-
-```************** Note: expand with DataGo options **************```
-
 *   You have access to a running Solace message router with the following configuration:
     *   Enabled message VPN
     *   Enabled client username
@@ -59,9 +56,9 @@ In order to send or receive messages to a Solace message router, you need to kno
 <td>Description</td>
 </tr>
 <tr>
-<td>Host</td>
-<td>String of the form <code>DNS name</code> or <code>IP:Port</code></td>
-<td>This is the address clients use when connecting to the Solace message router to send and receive messages. For a Solace VMR this there is only a single interface so the IP is the same as the management IP address.
+<td>Host url</td>
+<td>String of the form <code>protocol://DNS name:Port</code> or <code>protocol://IP:Port</code></td>
+<td>This is the address clients use when connecting to the Solace message router to send and receive messages. If Port is not provided the default port for the protocol will be used. For a Solace VMR there is only a single interface so the IP is the same as the management IP address.
 For Solace message router appliances this is the host address of the message-backbone.
 </td>
 </tr>
@@ -83,11 +80,11 @@ For Solace message router appliances this is the host address of the message-bac
 </tbody>
 </table>
 
-This information will be need to be passed as arguments to the sample scripts as described in the "Running the Samples" section below.
+This information will be passed as arguments to the sample scripts as described in the "Running the Samples" section below.
 
 ## Obtaining the Solace API
 
-This tutorial depends on you having the Solace Node.js API downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Building section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the build instructions appropriately.
+This tutorial depends on you having the Solace Node.js API version 10 or later downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Building section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the build instructions appropriately.
 
 The API Reference is available online at the [Node.js API documentation]({{ site.docs-api-reference }}){:target="_top"}.
 
@@ -96,7 +93,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -138,7 +135,8 @@ The requestor must create a message and the topic to send the message to:
 ```javascript
 var requestText = 'Sample Request';
 var request = solace.SolclientFactory.createMessage();
-request.setDestination(solace.SolclientFactory.createTopic(requestor.topicName));
+requestor.log('Sending request "' + requestText + '" to topic "' + requestor.topicName + '"...');
+request.setDestination(solace.SolclientFactory.createTopicDestination(requestor.topicName));
 request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, requestText));
 request.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
 ```
@@ -147,19 +145,19 @@ Now the request can be sent. Notice callbacks `replyReceivedCb` and `requestFail
 
 ```javascript
 try {
-	requestor.session.sendRequest(
-		request,
-		5000, // 5 seconds timeout for this operation
-		function (session, message) {
-			requestor.replyReceivedCb(session, message);
-		},
-		function (session, event) {
-			requestor.requestFailedCb(session, event);
-		},
-		null // not providing correlation object
-	);
+    requestor.session.sendRequest(
+        request,
+        5000, // 5 seconds timeout for this operation
+        function (session, message) {
+            requestor.replyReceivedCb(session, message);
+        },
+        function (session, event) {
+            requestor.requestFailedCb(session, event);
+        },
+        null // not providing correlation object
+    );
 } catch (error) {
-	requestor.log(error.toString());
+    requestor.log(error.toString());
 }
 ```
 
@@ -173,16 +171,16 @@ Just as with previous tutorials, you still need to connect a session and subscri
 
 ```javascript
 replier.reply = function (message) {
-                                                                                                 
-	if (replier.session !== null) {
-		var reply = solace.SolclientFactory.createMessage();
-		var replyText = message. message.getSdtContainer().getValue() + " - Sample Reply";
-		reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, replyText));
-		replier.session.sendReply(message, reply);
-                                
-	} else {
-		replier.log('Cannot reply: not connected to Solace message router.');
-	}
+    if (replier.session !== null) {
+        var reply = solace.SolclientFactory.createMessage();
+        var ba = message.getBinaryAttachment();
+        var replyText = message.getSdtContainer().getValue() + " - Sample Reply";
+        reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, replyText));
+        replier.session.sendReply(message, reply);
+        replier.log('Replied.');
+    } else {
+        replier.log('Cannot reply: not connected to Solace message router.');
+    }
 };
 ```
 
@@ -190,7 +188,7 @@ The replier.reply is the function that is called from the replier message event 
 
 ```javascript
 // define message event listener
-replier.session.on(solace.SessionEventCode.MESSAGE, (message) => {
+replier.session.on(solace.SessionEventCode.MESSAGE, function (message) {
     try {
         replier.reply(message);
     } catch (error) {
@@ -215,12 +213,7 @@ requestor.requestFailedCb = function (session, event) {
 
 ## Summarizing
 
-                                                                                         
-
 The full source code for this example is available in [GitHub]({{ site.repository }}){:target="_blank"}. If you combine the example source code shown above results in the following source:
-                                                                                               
-                                                                                             
-                                                                                         
 
 *   [BasicRequestor.js]({{ site.repository }}/blob/master/src/basic-samples/BasicRequestor.js)
 *   [BasicReplier.js]({{ site.repository }}/blob/master/src/basic-samples/BasicReplier.js)
@@ -231,27 +224,20 @@ Clone the GitHub repository containing the Solace samples.
 
 ```
 git clone https://github.com/SolaceSamples/solace-samples-nodejs
-cd {{ site.baseurl | remove: '/'}}/src/basic-samples
+cd {{ site.baseurl | remove: '/'}}
 ```
 
 ### Installing the Node.js API
-                                                                                
-                                                                                      
-                                                                                
-   
 
-For a local installation of the API package, run from the current `src/basic-samples` directory:
+For a local installation of the API package, run from the current repository root directory:
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
-                                                                                  
-                                                                                      
-   
 
 ### Running the Samples
 
-The samples consist of two separate requestor and replier Node.js applications _(BasicRequestor.js_ and _BasicReplier.js)_.
+The samples consist of two separate requestor and replier Node.js applications in the `/src/basic-samples` directory: _(BasicRequestor.js_ and _BasicReplier.js)_.
 
 The publisher application publishes one message and exits, the subscriber application is running until Ctrl-C is pressed on the console.
 
@@ -266,18 +252,17 @@ node _BasicReplier.js <host:port> <client-username> <client-password> <message-v
 The following is the output of the tutorial’s _BasicReplier.js_ application after it successfully connected to the Solace message router and subscribed to the request topic.
 
 ```bash
-$ node TopicSubscriber.js 192.168.133.64 testuser passw default
-[19:12:07] 
+$ node BasicReplier.js ws://192.168.133.64 testuser@default passw
+[14:52:10]
 *** replier to topic "tutorial/topic" is ready to connect ***
-[19:12:07] Connecting to Solace message router using WebSocket transport url ws://192.168.133.64
-[19:12:07] Solace message router VPN name: default
-[19:12:07] Client username: testuser
-[19:12:07] Connecting...
-[19:12:07] Press Ctrl-C to exit
-[19:12:07] === Successfully connected and ready to subscribe to request topic. ===
-[19:12:07] Subscribing to topic: tutorial/topic
-[19:12:07] Successfully subscribed to request topic: tutorial/topic
-[19:12:07] === Ready to receive requests. ===
+[14:52:10] Connecting to Solace message router using url: ws://192.168.133.64
+[14:52:10] Client username: testuser
+[14:52:10] Solace message router VPN name: default
+[14:52:10] Press Ctrl-C to exit
+[14:52:10] === Successfully connected and ready to subscribe to request topic. ===
+[14:52:10] Subscribing to topic: tutorial/topic
+[14:52:10] Successfully subscribed to request topic: tutorial/topic
+[14:52:10] === Ready to receive requests. ===
 ```
 
 Now, run _BasicRequestor.js_ in Node.js, also specifying the same arguments.
@@ -287,44 +272,45 @@ It will connect to the router, send a request, receive a reply and exit.
 The following is the output of the tutorial’s _BasicRequestor.js_ application after it successfully connected to the Solace message router, sent a request, received a reply and exited.
 
 ```bash
-$ node TopicSubscriber.js 192.168.133.64 testuser passw default
-[19:17:11] 
+$ node BasicRequestor.js ws://192.168.133.64 testuser@default passw
+[14:52:16]
 *** requestor to topic "tutorial/topic" is ready to connect ***
-[19:17:11] Connecting to Solace message router using WebSocket transport url ws://192.168.133.64
-[19:17:11] Solace message router VPN name: default
-[19:17:11] Client username: testuser    
-[19:17:11] Connecting...
-[19:17:11] === Successfully connected and ready to send requests. ===
-[19:17:11] Sending request "Sample Request" to topic "tutorial/topic"...
-[19:17:11] Received reply: "Sample Request - Sample Reply", details:
-Destination:                            TOPIC #P2P/v:vmr-133-64/mPuoLl8m/solclientjs/nodejs/1624363852/0001/#
+[14:52:16] Connecting to Solace message router using url: ws://192.168.133.64
+[14:52:16] Client username: testuser
+[14:52:16] Solace message router VPN name: default
+[14:52:16] === Successfully connected and ready to send requests. ===
+[14:52:16] Sending request "Sample Request" to topic "tutorial/topic"...
+[14:52:16] Received reply: "Sample Request - Sample Reply", details:
+Destination:                            [Topic #P2P/v:vmr-133-64/GJxznbpz/solclientjs/nodejs/0623304208/0001/#]
 CorrelationId:                          #REQ1
 Class Of Service:                       COS1
 DeliveryMode:                           DIRECT
+Expiration:                             0 (Wed Dec 31 1969 19:00:00 GMT-0500 (Eastern Standard Time))
 Reply Message
 Binary Attachment:                      len=32
   1c 20 53 61 6d 70 6c 65    20 52 65 71 75 65 73 74    ..Sample.Request
   20 2d 20 53 61 6d 70 6c    65 20 52 65 70 6c 79 00    .-.Sample.Reply.
 
-[19:17:11] Disconnecting from Solace message router...
-[19:17:11] Disconnected.
+[14:52:16] Disconnecting from Solace message router...
+[14:52:16] Disconnected.
 ```
 
 This is the replier replying to a request (_BasicReplier.js_):
 
 ```bash
-[19:17:11] Received message: "Sample Request", details:
-Destination:                            TOPIC tutorial/topic
+[14:52:16] Received message: "Sample Request", details:
+Destination:                            [Topic tutorial/topic]
 CorrelationId:                          #REQ1
 Class Of Service:                       COS1
 DeliveryMode:                           DIRECT
-ReplyTo:                                TOPIC #P2P/v:vmr-133-64/mPuoLl8m/solclientjs/nodejs/1624363852/0001/#
+Expiration:                             0 (Wed Dec 31 1969 19:00:00 GMT-0500 (Eastern Standard Time))
+ReplyTo:                                [Topic #P2P/v:vmr-133-64/GJxznbpz/solclientjs/nodejs/0623304208/0001/#]
 Binary Attachment:                      len=17
   1c 11 53 61 6d 70 6c 65    20 52 65 71 75 65 73 74    ..Sample.Request
   00                                                    .
 
-[19:17:11] Replying...
-[19:17:11] Replied.
+[14:52:16] Replying...
+[14:52:16] Replied.
 ```
 
 With that you now know how to successfully implement request-reply message exchange pattern using Direct messages.

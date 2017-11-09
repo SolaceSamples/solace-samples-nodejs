@@ -74,7 +74,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -233,15 +233,7 @@ subscriber.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent)
 
 See `solace.SessionEventCode` in the [Node.js API Reference]({{ site.docs-api-reference }}){:target="_top"} for the full list of session event codes.
 
-                                         
-                                                                   
-     
 ## Receiving a message
-                                  
-                 
-                                   
- 
-   
 
 This tutorial uses “Direct” messages which are at most once delivery messages. So first, let’s create a listener and express interest in the messages by subscribing to a Solace topic. Then you can look at publishing a matching message and see it received.
 
@@ -293,7 +285,6 @@ After the subscription is successfully added the subscriber is ready to receive 
 ## Sending a message
 
 Now it is time to send a message to the waiting consumer. 
-                                
 
 ![]({{ site.baseurl }}/images/pub-sub-receiving-message-300x134.png)
 
@@ -339,20 +330,20 @@ Clone the GitHub repository containing the Solace samples.
 
 ```
 git clone https://github.com/SolaceSamples/solace-samples-nodejs
-cd {{ site.baseurl | remove: '/'}}/src/basic-samples
+cd {{ site.baseurl | remove: '/'}}
 ```
 
 ### Installing the Node.js API
 
-For a local installation of the API package, run from the current `src/basic-samples` directory:
+For a local installation of the API package, run from the current repository root directory:
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Running the Samples
 
-The samples consist of two separate publisher and subscriber Node.js applications: `TopicPublisher.js` and `TopicSubsciber.js`.
+The samples consist of two separate publisher and subscriber Node.js applications in the `/src/basic-samples` directory: `TopicPublisher.js` and `TopicSubsciber.js`.
 
 The publisher application publishes one message and exits, the subscriber application is running until Ctrl-C is pressed on the console.
 

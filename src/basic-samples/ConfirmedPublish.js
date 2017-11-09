@@ -91,16 +91,16 @@ var QueueProducer = function (solaceModule, queueName) {
             producer.sendMessages();
         });
         producer.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, function (sessionEvent) {
-            producer.log('Delivery of message with correlation key = ' + JSON.stringify(sessionEvent.correlationKey) +
-              ' confirmed.');
+            producer.log('Delivery of message with correlation key = ' +
+                JSON.stringify(sessionEvent.correlationKey) + ' confirmed.');
             producer.messageAckRecvd++;
             if (producer.messageAckRecvd === producer.numOfMessages) {
                 producer.exit();
             }
         });
         producer.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, function (sessionEvent) {
-            producer.log('Delivery of message with correlation key = ' + JSON.stringify(sessionEvent.correlationKey) +
-                ' rejected, info: ' + sessionEvent.infoStr);
+            producer.log('Delivery of message with correlation key = ' +
+                JSON.stringify(sessionEvent.correlationKey) + ' rejected, info: ' + sessionEvent.infoStr);
             producer.messageAckRecvd++;
             if (producer.messageAckRecvd === producer.numOfMessages) {
                 producer.exit();

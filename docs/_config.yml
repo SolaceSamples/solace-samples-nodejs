@@ -18,6 +18,7 @@ docs-api-reference: http://docs.solace.com/API-Developer-Online-Ref-Documentatio
 docs-semp: http://docs.solace.com/SEMP/Using-SEMP-to-Manage-and-Monitor-Routers.htm
 docs-topic-mapping: http://docs.solace.com/Features/Core-Concepts.htm#topic-queue-mapping
 docs-msg-consumer-ack-modes: http://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Acknowledging-Messages.htm
+docs-ack-pub-msgs: http://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Acknowledging-Published-.htm
 
 #----------------------------------------------------
 # Generally don't modify items below this point

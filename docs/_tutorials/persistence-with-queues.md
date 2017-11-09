@@ -76,7 +76,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -183,6 +183,8 @@ producer.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
 producer.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
     producer.log('Disconnected.');
     if (producer.session !== null) {
+                                
+     
         producer.session.dispose();
         producer.session = null;
     }
@@ -192,20 +194,10 @@ Note that the application logic can be triggered only after receiving the `solac
 
 
 ### Sending a message to a queue
-                                                                                                                                                                                          
-                        
-                     
-   
-   
 
 Now it is time to send a message to the queue.  Remember that the queue must be pre-configured on the message-router as described in the "Creating a Durable Queue" section.
 
 ![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
-                           
-   
-                                                                                     
-                                    
-                                  
 
 The actual method calls to create and send guaranteed messages to a queue is like for direct messages in the publish/subscribe tutorial. The differences are that:
 * a durable queue type destination is created and used; and
@@ -316,7 +308,7 @@ Clone the GitHub repository containing the Solace samples.
 
 ```
 git clone {{ site.repository }}
-cd {{ site.baseurl | remove: '/'}}/src/basic-samples
+cd {{ site.baseurl | remove: '/'}}
 ```
 
 ### Installing the Node.js API

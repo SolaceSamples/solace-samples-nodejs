@@ -130,7 +130,7 @@ var BasicRequestor = function (solaceModule, topicName) {
 
     // Callback for replies
     requestor.replyReceivedCb = function (session, message) {
-        requestor.log('Received reply: "' + message.getSdtContainer().getValue() + '", details:\n' + message.dump());
+        requestor.log('Received reply: "' + message.getSdtContainer().getValue() + '"');
         requestor.exit();
     };
 
