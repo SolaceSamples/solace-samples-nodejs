@@ -2,6 +2,8 @@
 
 This directory contains code showing how to make use of advanced features of the Solace message-router.
 
+The code requires Node.js API version 10 or later.
+
 * DTEConsumer: This sample shows how to consume messages from a Durable Topic Endpoint (DTE). The DTE with the name "tutorial/DTE" must have been provisioned on the message router vpn. The sample will associate the DTE with the topic "tutorial/topic", so the `basic-samples/TopicPublisher` app can be used to send messages to this topic.
 
 * ActiveFlowIndication: This sample will show how multiple flows can bind to an exclusive queue, but only one client at a time can actively receive messages. If the Active Flow Indication Flow property is enabled, a Flow active/inactive event is returned to the client when its bound flow becomes/stops being the active flow. This sample requires that the queue "tutorial/queue" exists and configured to be "exclusive". Start this app, then the `basic-samples/ConfirmedPublish` app can be used to send 10 messages to trigger it.

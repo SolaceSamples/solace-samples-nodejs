@@ -321,15 +321,15 @@ cd {{ site.baseurl | remove: '/'}}/src/basic-samples
 
 ### Installing the Node.js API
 
-For a local installation of the API package, run from the current `src/basic-samples` directory:
+For a local installation of the API package, run from the current repository root directory:
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Running the Samples
 
-The samples consist of two separate producer and consumer Node.js applications: `QueueProducer.js` and `QueueConsumer.js`.
+The samples consist of two separate producer and consumer Node.js applications in the `/src/basic-samples` directory: `QueueProducer.js` and `QueueConsumer.js`.
 
 The producer application sends one message and exits, the consumer application is running until Ctrl-C is pressed on the console.
 
