@@ -45,41 +45,48 @@ var TopicPublisher = function (solaceModule, topicName) {
 
     // main function
     publisher.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            publisher.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            publisher.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        publisher.connect(argv);
     };
 
-    // Establishes connection to Solace message router by its hostname
-    publisher.connect = function (host, username, password, vpn) {
+    // Establishes connection to Solace message router
+    publisher.connect = function (argv) {
         if (publisher.session !== null) {
             publisher.log('Already connected and ready to publish.');
-        } else {
-            publisher.connectToSolace(host, username, password, vpn);
+            return;
         }
-    };
-
-    publisher.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        publisher.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        publisher.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        publisher.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            publisher.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        publisher.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        publisher.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        publisher.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
         // create session
-        publisher.session = solace.SolclientFactory.createSession(sessionProperties);
+        try {
+            publisher.session = solace.SolclientFactory.createSession({
+                // solace.SessionProperties
+                url:      hosturl,
+                vpnName:  vpn,
+                userName: username,
+                password: pass,
+            });
+        } catch (error) {
+            publisher.log(error.toString());
+        }
         // define session event listeners
         publisher.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             publisher.log('=== Successfully connected and ready to publish messages. ===');
             publisher.publish();
             publisher.exit();
         });
-        publisher.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
+        publisher.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             publisher.log('Disconnected.');
             if (publisher.session !== null) {
                 publisher.session.dispose();
@@ -99,10 +106,10 @@ var TopicPublisher = function (solaceModule, topicName) {
         if (publisher.session !== null) {
             var messageText = 'Sample Message';
             var message = solace.SolclientFactory.createMessage();
-            publisher.log('Publishing message "' + messageText + '" to topic "' + publisher.topicName + '"...');
-            message.setDestination(solace.SolclientFactory.createTopic(publisher.topicName));
+            message.setDestination(solace.SolclientFactory.createTopicDestination(publisher.topicName));
             message.setBinaryAttachment(messageText);
             message.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
+            publisher.log('Publishing message "' + messageText + '" to topic "' + publisher.topicName + '"...');
             try {
                 publisher.session.send(message);
                 publisher.log('Message published.');

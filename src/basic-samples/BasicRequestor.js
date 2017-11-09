@@ -44,40 +44,47 @@ var BasicRequestor = function (solaceModule, topicName) {
 
     // main function
     requestor.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            requestor.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            requestor.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        requestor.connect(argv);
     };
 
     // Establishes connection to Solace message router
-    requestor.connect = function (host, username, password, vpn) {
+    requestor.connect = function (argv) {
         if (requestor.session !== null) {
-            requestor.log('Already connected and ready to send requests.');
-        } else {
-            requestor.connectToSolace(host, username, password, vpn);
+            requestor.log('Already connected and ready to publish.');
+            return;
         }
-    };
-
-    requestor.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        requestor.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        requestor.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        requestor.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            requestor.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        requestor.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        requestor.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        requestor.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
         // create session
-        requestor.session = solace.SolclientFactory.createSession(sessionProperties);
+        try {
+            requestor.session = solace.SolclientFactory.createSession({
+                // solace.SessionProperties
+                url:      hosturl,
+                vpnName:  vpn,
+                userName: username,
+                password: pass,
+            });
+        } catch (error) {
+            requestor.log(error.toString());
+        }
         // define session event listeners
         requestor.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             requestor.log('=== Successfully connected and ready to send requests. ===');
             requestor.request();
         });
-        requestor.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
+        requestor.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             requestor.log('Disconnected.');
             if (requestor.session !== null) {
                 requestor.session.dispose();
@@ -98,7 +105,7 @@ var BasicRequestor = function (solaceModule, topicName) {
             var requestText = 'Sample Request';
             var request = solace.SolclientFactory.createMessage();
             requestor.log('Sending request "' + requestText + '" to topic "' + requestor.topicName + '"...');
-            request.setDestination(solace.SolclientFactory.createTopic(requestor.topicName));
+            request.setDestination(solace.SolclientFactory.createTopicDestination(requestor.topicName));
             request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, requestText));
             request.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
             try {

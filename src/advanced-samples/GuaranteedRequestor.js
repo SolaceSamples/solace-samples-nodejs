@@ -26,12 +26,12 @@
 
 /*jslint es6 devel:true node:true*/
 
-var GuaranteedRequestor = function (solaceModule, requestQueueName) {
+var GuaranteedRequestor = function (solaceModule, requestTopicName) {
     'use strict';
     var solace = solaceModule;
     var requestor = {};
     requestor.session = null;
-    requestor.requestQueueName = requestQueueName;
+    requestor.requestTopicName = requestTopicName;
     requestor.correlationID = null;
 
     // Logger
@@ -46,40 +46,47 @@ var GuaranteedRequestor = function (solaceModule, requestQueueName) {
 
     // main function
     requestor.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            requestor.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            requestor.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        requestor.connect(argv);
     };
 
     // Establishes connection to Solace message router
-    requestor.connect = function (host, username, password, vpn) {
+    requestor.connect = function (argv) {
         if (requestor.session !== null) {
-            requestor.log('Already connected and ready to send requests.');
-        } else {
-            requestor.connectToSolace(host, username, password, vpn);
+            requestor.log('Already connected and ready to consume messages.');
+            return;
         }
-    };
-
-    requestor.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        requestor.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        requestor.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        requestor.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            requestor.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        requestor.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        requestor.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        requestor.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
         // create session
-        requestor.session = solace.SolclientFactory.createSession(sessionProperties);
+        try {
+            requestor.session = solace.SolclientFactory.createSession({
+                // solace.SessionProperties
+                url:      hosturl,
+                vpnName:  vpn,
+                userName: username,
+                password: pass,
+            });
+        } catch (error) {
+            requestor.log(error.toString());
+        }
         // define session event listeners
         requestor.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             requestor.log('=== Successfully connected and ready to send requests. ===');
             requestor.request();
         });
-        requestor.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
+        requestor.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             requestor.log('Disconnected.');
             if (requestor.session !== null) {
                 requestor.session.dispose();
@@ -98,28 +105,24 @@ var GuaranteedRequestor = function (solaceModule, requestQueueName) {
     requestor.request = function () {
         if (requestor.session !== null) {
             // creates a temporary queue to listen to responses
-            var replyToQueue = requestor.session.createTemporaryQueue();
-            // creates a flow to this queue
-            var flow = requestor.session.createSubscriberFlow({
-                endpoint: {destination: replyToQueue,
-                    durable: solace.EndpointDurability.NON_DURABLE_GUARANTEED,
-                    permissions: solace.EndpointPermissions.DELETE,}
+            const replyMessageConsumer = requestor.session.createMessageConsumer({
+                queueDescriptor: { type: solace.QueueType.QUEUE, durable: false },
             });
-            // send the request when the listening flow is up
-            flow.on(solace.FlowEventName.UP, function onMessage(message) {
+            // send the request when the listening message consumer is up
+            replyMessageConsumer.on(solace.MessageConsumerEventName.UP, function () {
                 var msg = solace.SolclientFactory.createMessage();
                 const requestText = "Sample Request";
-                requestor.log('Sending request "' + requestText + '" to request queue "' + requestor.requestQueueName + '"...');
-                msg.setDestination(new solace.Destination(requestor.requestQueueName, solace.DestinationType.QUEUE));
+                requestor.log('Sending request "' + requestText + '" to request topic "' + requestor.requestTopicName + '"...');
+                msg.setDestination(solace.SolclientFactory.createTopicDestination(requestor.requestTopicName));
                 msg.setBinaryAttachment(requestText);
-                msg.setReplyTo(replyToQueue);
+                msg.setReplyTo(replyMessageConsumer.getDestination());
                 requestor.correlationID = 'MyCorrelationID'
                 msg.setCorrelationId(requestor.correlationID);
                 msg.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
                 requestor.session.send(msg);
             });
             // process the response received at the replyToQueue
-            flow.on(solace.FlowEventName.MESSAGE, function onMessage(message) {
+            replyMessageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function onMessage(message) {
                 if (message.getCorrelationId() === requestor.correlationID) {
                     requestor.log('Received reply: "' + message.getBinaryAttachment() + '", details:\n' + message.dump());
                 } else {
@@ -128,7 +131,7 @@ var GuaranteedRequestor = function (solaceModule, requestQueueName) {
                 }
                 requestor.exit();
             });
-            flow.connect();
+            replyMessageConsumer.connect();
         } else {
             requestor.log('Cannot send request because not connected to Solace message router.');
         }
@@ -158,7 +161,8 @@ var GuaranteedRequestor = function (solaceModule, requestQueueName) {
     return requestor;
 };
 
-var solace = require('solclientjs').debug; // logging supported
+var solace = require("../../../../core/index.js");
+// var solace = require('solclientjs').debug; // logging supported
 
 // Initialize factory with the most recent API defaults
 var factoryProps = new solace.SolclientFactoryProperties();
@@ -170,7 +174,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the requestor, specifying the name of the request topic
-var requestor = new GuaranteedRequestor(solace, 'tutorial/requestqueue');
+var requestor = new GuaranteedRequestor(solace, 'tutorial/requesttopic');
 
 // send request to Solace message router
 requestor.run(process.argv);

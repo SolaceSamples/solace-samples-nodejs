@@ -1,4 +1,5 @@
 # Getting Started Examples
+
 ## Solace Node.js API
 
 These tutorials will get you up to speed and sending messages with Solace technology as quickly as possible. There are two ways you can get started:
@@ -8,14 +9,19 @@ These tutorials will get you up to speed and sending messages with Solace techno
 
 ## Contents
 
-This repository contains code and matching tutorial walk throughs for five different basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
+This repository contains:
 
-## Checking out and Building
+* Code and matching tutorial walk throughs for five different basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
+* Additional code showing how to make use of advanced features of the Solace message-router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples). For further details, refer to the [Customer Documentation - Developer Guide] (http://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm) 
 
-To check out the project and build it, do the following:
+## Checking out
 
-  1. clone this GitHub repository
-  1. `cd solace-samples-nodejs`
+To check out the project, clone this GitHub repository:
+
+```
+git clone https://github.com/SolaceSamples/solace-samples-nodejs
+cd solace-samples-nodejs
+```
  
 ### Download the Solace JavaScript API
 
@@ -29,11 +35,11 @@ npm install <path_to_tarball_directory>/node-solclientjs-<version>.tar.gz
 
 ## Running the Samples
 
-The samples are found in the `src/basic-samples` directory.
+The samples are found in the `src/basic-samples` and `src/advanced-samples` directories.
 
 You run the sample using node. For example:
 
-    node TopicPublisher.js <HOST>
+    node TopicPublisher.js <protocol://host:port> <client-username>@<message-vpn> <client-password>
 
 See the [tutorials](https://solacesamples.github.io/solace-samples-nodejs/) for more details.
 

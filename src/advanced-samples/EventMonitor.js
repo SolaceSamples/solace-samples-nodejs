@@ -47,34 +47,41 @@ var EventSubscriber = function (solaceModule, topicName) {
 
     // main function
     subscriber.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            subscriber.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            subscriber.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        subscriber.connect(argv);
     };
 
     // Establishes connection to Solace message router
-    subscriber.connect = function (host, username, password, vpn) {
+    subscriber.connect = function (argv) {
         if (subscriber.session !== null) {
-            subscriber.log('Already connected and ready to subscribe.');
-        } else {
-            subscriber.connectToSolace(host, username, password, vpn);
+            subscriber.log('Already connected and ready to consume messages.');
+            return;
         }
-    };
-
-    subscriber.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        subscriber.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        subscriber.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        subscriber.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            subscriber.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        subscriber.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        subscriber.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        subscriber.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
         // create session
-        subscriber.session = solace.SolclientFactory.createSession(sessionProperties);
+        try {
+            subscriber.session = solace.SolclientFactory.createSession({
+                // solace.SessionProperties
+                url:      hosturl,
+                vpnName:  vpn,
+                userName: username,
+                password: pass,
+            });
+        } catch (error) {
+            subscriber.log(error.toString());
+        }
         // define session event listeners
         subscriber.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             subscriber.log('=== Successfully connected and ready to subscribe. ===');
@@ -102,7 +109,7 @@ var EventSubscriber = function (solaceModule, topicName) {
             }
         });
         // define message event listener
-        subscriber.session.on(solace.SessionEventCode.MESSAGE, (message) => {
+        subscriber.session.on(solace.SessionEventCode.MESSAGE, function (message) {
             subscriber.log('Received Client Connect event: "' + message.getBinaryAttachment());
         });
         // connect the session

@@ -19,13 +19,14 @@
 
 /**
  * Solace Systems Node.js API
- * Secure Session tutorial - Topic Subscriber
- * Demonstrates subscribing to a topic for direct messages and receiving messages
+ * Secure Session tutorial
+ * Demonstrates the use of secure session and
+ * server and client certificate authentication 
  */
 
 /*jslint es6 node:true devel:true*/
 
-var TopicSubscriber = function (solaceModule, topicName) {
+var SecureTopicSubscriber = function (solaceModule, topicName) {
     'use strict';
     var solace = solaceModule;
     var subscriber = {};
@@ -46,50 +47,62 @@ var TopicSubscriber = function (solaceModule, topicName) {
 
     // main function
     subscriber.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            subscriber.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            subscriber.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        subscriber.connect(argv);
     };
+
+    subscriber.res = function (arg) {
+        const { resolve } = require('path');
+        return resolve(__dirname, '.', arg);
+    }
 
     // Establishes connection to Solace message router
-    subscriber.connect = function (host, username, password, vpn) {
+    subscriber.connect = function (argv) {
         if (subscriber.session !== null) {
             subscriber.log('Already connected and ready to subscribe.');
-        } else {
-            subscriber.connectToSolace(host, username, password, vpn);
+            return;
         }
-    };
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            subscriber.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        subscriber.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        subscriber.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        subscriber.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
+        // create session properties
+        var sessionProperties = new solace.SessionProperties({
+            url:      hosturl,
+            vpnName:  vpn,
+            userName: username,
+            password: pass,
+        });
 
-  subscriber.res = function (arg) {
-    const { resolve } = require('path');
-    return resolve(__dirname, '.', arg);
-  }
-
-  subscriber.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'wss://' + host;
-        subscriber.log('Connecting to Solace message router using Secure WebSocket transport url wss://' + host);
-        sessionProperties.vpnName = vpn;
-        subscriber.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        subscriber.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
-        // secure session related session properties
-        sessionProperties.authenticationScheme = solace.AuthenticationScheme.CLIENT_CERTIFICATE;
+        // optional: add secure session related session properties
         sessionProperties.sslExcludedProtocols = ['TLSv1'];
         sessionProperties.sslCipherSuites = 'AES128-GCM-SHA256';
+
+        // for server certificate authentication
         sessionProperties.sslValidateCertificate = true;
-        sessionProperties.sslTrustStores = [subscriber.res('certs/root_ca-rsa.crt')];
         sessionProperties.sslTrustedCommonNameList = ['TestServerCN'];
-        // listed for completeness but cannot be used at the same time as
-        // sessionProperties.sslPfx = res('./client_certificates/client-rsa.pfx');
-        // sessionProperties.sslPfxPassword = 'pfx_password';
+        sessionProperties.sslTrustStores = [subscriber.res('certs/root_ca-rsa.crt')];
+
+        // for client certificate authentication
+        sessionProperties.authenticationScheme = solace.AuthenticationScheme.CLIENT_CERTIFICATE;
+        // -> sslPrivateKey: file containing private key of the client in PEM format.
         sessionProperties.sslPrivateKey = subscriber.res('certs/client1-rsa-1.key');
         sessionProperties.sslPrivateKeyPassword = 'key_password';
         sessionProperties.sslCertificate = subscriber.res('certs/client1-rsa-1.crt');
+        // -> sslPfx: private key, certificate and optional CA certificates of the client
+        // in PFX or PKCS12 format. Cannot be used at the same time as sslPrivateKey and sslCertificate
+        // sessionProperties.sslPfx = subscriber.res('certs/client-rsa.pfx');
+        // sessionProperties.sslPfxPassword = 'pfx_password';
+
         // create session
         subscriber.session = solace.SolclientFactory.createSession(sessionProperties);
         // define session event listeners
@@ -119,7 +132,7 @@ var TopicSubscriber = function (solaceModule, topicName) {
             }
         });
         // define message event listener
-        subscriber.session.on(solace.SessionEventCode.MESSAGE, (message) => {
+        subscriber.session.on(solace.SessionEventCode.MESSAGE, function (message) {
             subscriber.log('Received message: "' + message.getBinaryAttachment() + '", details:\n' + message.dump());
         });
         // connect the session
@@ -139,7 +152,7 @@ var TopicSubscriber = function (solaceModule, topicName) {
                 subscriber.log('Subscribing to topic: ' + subscriber.topicName);
                 try {
                     subscriber.session.subscribe(
-                        solace.SolclientFactory.createTopic(subscriber.topicName),
+                        solace.SolclientFactory.createTopicDestination(subscriber.topicName),
                         true, // generate confirmation when subscription is added successfully
                         subscriber.topicName, // use topic name as correlation key
                         10000 // 10 seconds timeout for this operation
@@ -168,7 +181,7 @@ var TopicSubscriber = function (solaceModule, topicName) {
                 subscriber.log('Unsubscribing from topic: ' + subscriber.topicName);
                 try {
                     subscriber.session.unsubscribe(
-                        solace.SolclientFactory.createTopic(subscriber.topicName),
+                        solace.SolclientFactory.createTopicDestination(subscriber.topicName),
                         true, // generate confirmation when subscription is removed successfully
                         subscriber.topicName, // use topic name as correlation key
                         10000 // 10 seconds timeout for this operation
@@ -201,7 +214,7 @@ var TopicSubscriber = function (solaceModule, topicName) {
     return subscriber;
 };
 
-var solace = require('solclientjs').debug; // logging supported
+solace = require('solclientjs').debug; // logging supported
 
 // Initialize factory with the most recent API defaults
 var factoryProps = new solace.SolclientFactoryProperties();
@@ -213,7 +226,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the subscriber, specifying the name of the subscription topic
-var subscriber = new TopicSubscriber(solace, 'tutorial/topic');
+var subscriber = new SecureTopicSubscriber(solace, 'tutorial/topic');
 
 // subscribe to messages on Solace message router
 subscriber.run(process.argv);

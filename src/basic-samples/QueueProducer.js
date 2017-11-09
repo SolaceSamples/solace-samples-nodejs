@@ -45,42 +45,48 @@ var QueueProducer = function (solaceModule, queueName) {
 
     // main function
     producer.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            producer.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            producer.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        producer.connect(argv);
     };
 
-    // Establishes connection to Solace message router by its hostname
-    producer.connect = function (host, username, password, vpn) {
+    // Establishes connection to Solace message router
+    producer.connect = function (argv) {
         if (producer.session !== null) {
-            producer.log('Already connected and ready to send messages.');
-        } else {
-            producer.connectToSolace(host, username, password, vpn);
+            producer.log('Already connected and ready to publish.');
+            return;
         }
-    };
-
-    producer.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        producer.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        producer.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        producer.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
-        // sessionProperties.publisherProperties = new solace.PublisherFlowProperties({enabled: false});
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            producer.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        producer.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        producer.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        producer.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
         // create session
-        producer.session = solace.SolclientFactory.createSession(sessionProperties);
+        try {
+            producer.session = solace.SolclientFactory.createSession({
+                // solace.SessionProperties
+                url:      hosturl,
+                vpnName:  vpn,
+                userName: username,
+                password: pass,
+            });
+        } catch (error) {
+            producer.log(error.toString());
+        }
         // define session event listeners
         producer.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             producer.log('=== Successfully connected and ready to send messages. ===');
             producer.sendMessage();
             producer.exit();
         });
-        producer.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
+        producer.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             producer.log('Disconnected.');
             if (producer.session !== null) {
                 producer.session.dispose();
@@ -101,7 +107,7 @@ var QueueProducer = function (solaceModule, queueName) {
             var messageText = 'Sample Message';
             var message = solace.SolclientFactory.createMessage();
             producer.log('Sending message "' + messageText + '" to queue "' + producer.queueName + '"...');
-            message.setDestination(new solace.Destination(producer.queueName, solace.DestinationType.QUEUE));
+            message.setDestination(solace.SolclientFactory.createDurableQueueDestination(producer.queueName));
             message.setBinaryAttachment(messageText);
             message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
             try {

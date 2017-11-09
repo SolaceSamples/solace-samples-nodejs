@@ -5,16 +5,13 @@ summary: Learn how to set up pub/sub messaging on a Solace VMR.
 icon: I_dev_P+S.svg
 ---
 
-This tutorial will introduce you to the fundamentals of the Solace Node.js API by connecting a client, adding a topic subscription and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange.
+This tutorial will introduce you to the fundamentals of the Solace Node.js API version 10 or later by connecting a client, adding a topic subscription and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange.
 
 ## Assumptions
 
 This tutorial assumes the following:
 
 *   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
-
-```************** Note: expand with DataGo options **************```
-
 *   You have access to a running Solace message router with the following configuration:
     *   Enabled message VPN
     *   Enabled client username
@@ -40,9 +37,9 @@ In order to send or receive messages to a Solace message router, you need to kno
 <td>Description</td>
 </tr>
 <tr>
-<td>Host</td>
-<td>String of the form <code>DNS name</code> or <code>IP:Port</code></td>
-<td>This is the address clients use when connecting to the Solace message router to send and receive messages. For a Solace VMR this there is only a single interface so the IP is the same as the management IP address.
+<td>Host url</td>
+<td>String of the form <code>protocol://DNS name:Port</code> or <code>protocol://IP:Port</code></td>
+<td>This is the address clients use when connecting to the Solace message router to send and receive messages. If Port is not provided the default port for the protocol will be used. For a Solace VMR there is only a single interface so the IP is the same as the management IP address.
 For Solace message router appliances this is the host address of the message-backbone.
 </td>
 </tr>
@@ -64,11 +61,11 @@ For Solace message router appliances this is the host address of the message-bac
 </tbody>
 </table>
 
-This information will be need to be passed as arguments to the sample scripts as described in the "Running the Samples" section below.
+This information will be passed as arguments to the sample scripts as described in the "Running the Samples" section below.
 
 ## Obtaining the Solace API
 
-This tutorial depends on you having the Solace Node.js API downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Building section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the build instructions appropriately.
+This tutorial depends on you having the Solace Node.js API version 10 or later downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Building section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the build instructions appropriately.
 
 The API Reference is available online at the [Node.js API documentation]({{ site.docs-api-reference }}){:target="_top"}.
 
@@ -88,6 +85,12 @@ The Solace Node.js API distribution package can be [downloaded here]({{ site.lin
 npm install <path_to_tarball_directory>/node-solclientjs-<version>.tar.gz 
 ```
 
+## Trying it yourself
+
+This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
+
+At the end, this tutorial walks through downloading and running the sample from source.
+
 ## Loading and Initializing the Solace Node.js API
 
 To load the Solace Node.js API into your Node.js application simply include the `solclientjs` module.
@@ -102,7 +105,7 @@ Use the debug version of the API of the `solclientjs` module instead, if you’r
 var solace = require('solclientjs').debug; // logging is supported here
 ```
 
-Then initialize the `SolclientFactory`, which is the first entry point to the API. Use the latest `version10` default settings profile to unlock all Solace Node.js API features.
+Then initialize the `SolclientFactory`, which is the first entry point to the API. Add the following to initialize with the latest `version10` behavior profile to run with the default property values that Solace recommends at the time of the version 10 release.
 
 ```javascript
 var factoryProps = new solace.SolclientFactoryProperties();
@@ -120,7 +123,7 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 In order to send or receive messages, an application must connect a Solace session. The Solace session is the basis for all client communication with the Solace message router.
 
-The `solace.SolclientFactory` is used to create Solace session from a set of `SessionProperties`.
+The `solace.SolclientFactory` is used to create a Solace `Session` from `SessionProperties`. In the example below the `SessionProperties` is created using object initializers.
 
 Then listeners are defined for Session Events of interest and for receiving direct messages, which are explained in the next sections. 
 
@@ -131,13 +134,14 @@ This tutorial’s sample code comes as two separated applications: one (with the
 The following is an example of session creating and connecting to the Solace message router for the subscriber. The publisher's code will be the same except for that it doesn't require a message event listener.
 
 ```javascript
-var sessionProperties = new solace.SessionProperties();
-sessionProperties.url = 'ws://' + host;
-sessionProperties.vpnName = vpn;
-sessionProperties.userName = username;
-sessionProperties.password = password;
 // create session
-subscriber.session = solace.SolclientFactory.createSession(sessionProperties);
+subscriber.session = solace.SolclientFactory.createSession({
+    // solace.SessionProperties
+    url:      hosturl,
+    vpnName:  vpn,
+    userName: username,
+    password: pass,
+});
 // define session event listeners
     /*...see section Session Events...*/
 // define message event listener
@@ -165,17 +169,13 @@ It is necessary to wire your application logic to events through listeners to ta
 This is how event listeners can be defined in the sample publisher:
 
 ```javascript
-publisher.session = solace.SolclientFactory.createSession(sessionProperties);
 // define session event listeners
 publisher.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
     publisher.log('=== Successfully connected and ready to publish messages. ===');
     publisher.publish();
     publisher.exit();
 });
-publisher.session.on(solace.SessionEventCode.CONNECTING, (sessionEvent) => {
-    publisher.log('Connecting...');
-});
-publisher.session.on(solace.SessionEventCode.DISCONNECTED, (sessionEvent) => {
+publisher.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
     publisher.log('Disconnected.');
     if (publisher.session !== null) {
         publisher.session.dispose();
@@ -197,12 +197,18 @@ publisher.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) 
 On the subscriber side we also might want to implement reaction to subscription error and to subscription added or removed:
 
 ```javascript
-subscriber.session = solace.SolclientFactory.createSession(sessionProperties);
 // define session event listeners
 subscriber.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
-    /*...SNIP...*/
-subscriber.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, function (sessionEvent) {
-    subscriber.log('Cannot subscribe to topic: ' + sessionEvent.correlationKey);
+    subscriber.log('=== Successfully connected and ready to subscribe. ===');
+    subscriber.subscribe();
+});
+subscriber.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
+    subscriber.log('Disconnected.');
+    subscriber.subscribed = false;
+    if (subscriber.session !== null) {
+        subscriber.session.dispose();
+        subscriber.session = null;
+    }
 });
 subscriber.session.on(solace.SessionEventCode.SUBSCRIPTION_OK, function (sessionEvent) {
     if (subscriber.subscribed) {
@@ -225,9 +231,17 @@ subscriber.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent)
 });
 ```
 
-See the [Solace Web Messaging API “Handling session events”]({{ site.docs-session-events }}){:target="_top"} documentation for the full list of session event codes.
+See `solace.SessionEventCode` in the [Node.js API Reference]({{ site.docs-api-reference }}){:target="_top"} for the full list of session event codes.
 
+                                         
+                                                                   
+     
 ## Receiving a message
+                                  
+                 
+                                   
+ 
+   
 
 This tutorial uses “Direct” messages which are at most once delivery messages. So first, let’s create a listener and express interest in the messages by subscribing to a Solace topic. Then you can look at publishing a matching message and see it received.
 
@@ -236,7 +250,6 @@ This tutorial uses “Direct” messages which are at most once delivery message
 With a subscriber session created in the previous step, we declare a message event listener.
 
 ```javascript
-publisher.session = solace.SolclientFactory.createSession(sessionProperties);
 // define session event listeners
     /*...see section Session Events...*/
 // define message event listener
@@ -247,7 +260,7 @@ subscriber.session.on(solace.SessionEventCode.MESSAGE, function (message) {
 // connect the session
 ```
 
-When a message is received, this listener is called with the message as one of the parameters.
+When a message is received, this listener is called with the message as parameter.
 
 You must subscribe to a topic in order to express interest in receiving messages. This tutorial uses the topic _“tutorial/topic”_.
 
@@ -271,7 +284,7 @@ subscriber.subscribe = function () {
 Notice parameters to the session `subscribe` function.
 
 *   __The first parameter__ is the subscription topic.
-*   __The second (Boolean) parameter__ specifies whether a corresponding events will be generated when the subscription is added successfully.
+*   __The second (boolean) parameter__ specifies whether a corresponding events will be generated when the subscription is added successfully.
 *   __The third parameter__ is the correlation key. This parameters value will be returned to the `SUBSCRIPTION_OK` session event listener for as the `correlationKey` property of the event: `event.correlationKey`.
 *   __The last, fourth parameter__ is the function call timeout. The timeout sets the limit in milliseconds the `subscribe` function is allowed to block the execution thread. If this limit is reached and the subscription is still not added, then an exception is thrown.
 
@@ -280,12 +293,13 @@ After the subscription is successfully added the subscriber is ready to receive 
 ## Sending a message
 
 Now it is time to send a message to the waiting consumer. 
+                                
 
 ![]({{ site.baseurl }}/images/pub-sub-receiving-message-300x134.png)
 
 ### Creating and sending the message
 
-To send a message, you must create a message and a topic. Both of these are created from the `solace.SolclientFactory`.
+To send a message, you must create a message and a topic type destination. Both of these are created from the `solace.SolclientFactory`.
 
 This tutorial uses “Direct” messages which are at most once delivery messages and will send a message with Text contents “Sample Message”.
 
@@ -294,10 +308,10 @@ This is how it is done in the sample publisher code:
 ```javascript
 var messageText = 'Sample Message';
 var message = solace.SolclientFactory.createMessage();
-publisher.log('Publishing message "' + messageText + '" to topic "tutorial/topic"...');
-message.setDestination(solace.SolclientFactory.createTopic("tutorial/topic"));
+message.setDestination(solace.SolclientFactory.createTopicDestination(publisher.topicName));
 message.setBinaryAttachment(messageText);
 message.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
+publisher.log('Publishing message "' + messageText + '" to topic "' + publisher.topicName + '"...');
 if (publisher.session !== null) {
     try {
         publisher.session.send(message);
@@ -347,30 +361,29 @@ The publisher application publishes one message and exits, the subscriber applic
 First run `TopicSubscriber.js` in Node.js, giving it following arguments:
 
 ```
-node TopicSubscriber.js <host:port> <client-username> <client-password> <message-vpn>
+node TopicSubscriber.js <protocol://host:port> <client-username>@<message-vpn> <client-password>
 ```
 
 The following is the output of the tutorial’s `TopicSubscriber.js` application after it successfully connected to the Solace message router and subscribed to the subscription topic.  
 
 ```bash
-$ node TopicSubscriber.js 192.168.133.64 testuser passw default
-[15:33:16]
+$ node TopicSubscriber.js ws://192.168.133.64 testuser@default passw
+[15:38:11]
 *** Subscriber to topic "tutorial/topic" is ready to connect ***
-[15:33:16] Connecting to Solace message router using WebSocket transport url ws://192.168.133.64
-[15:33:16] Solace message router VPN name: default
-[15:33:16] Client username: testuser
-[15:33:16] Connecting...
-[15:33:16] Press Ctrl-C to exit
-[15:33:16] === Successfully connected and ready to subscribe. ===
-[15:33:16] Subscribing to topic: tutorial/topic
-[15:33:16] Successfully subscribed to topic: tutorial/topic
-[15:33:16] === Ready to receive messages. ===
+[15:38:11] Connecting to Solace message router using url: ws://192.168.133.64
+[15:38:11] Client username: testuser
+[15:38:11] Solace message router VPN name: default
+[15:38:11] Press Ctrl-C to exit
+[15:38:11] === Successfully connected and ready to subscribe. ===
+[15:38:11] Subscribing to topic: tutorial/topic
+[15:38:11] Successfully subscribed to topic: tutorial/topic
+[15:38:11] === Ready to receive messages. ===
 ```
 
 Now, run `TopicPublisher.js` in Node.js, also specifying the same arguments.
 
 ```
-node TopicPublisher.js <host:port> <client-username> <client-password> <message-vpn>
+node TopicPublisher.js <protocol://host:port> <client-username>@<message-vpn> <client-password>
 ```
 
 It will connect to the router, publish a message and exit.
@@ -378,30 +391,29 @@ It will connect to the router, publish a message and exit.
 The following is the output of the tutorial’s `TopicPublisher.js` application after it successfully connected to the Solace message router, published a message and exited.  
 
 ```bash
-$ node basic-samples/TopicPublisher.js 192.168.133.64 testuser passw default
-[15:37:44]
+$ node TopicPublisher.js ws://192.168.133.64 testuser@default passw
+[15:38:18]
 *** Publisher to topic "tutorial/topic" is ready to connect ***
-[15:37:44] Connecting to Solace message router using WebSocket transport url ws://192.168.133.64
-[15:37:44] Solace message router VPN name: default
-[15:37:44] Client username: testuser
-[15:37:44] Connecting...
-[15:37:44] === Successfully connected and ready to publish messages. ===
-[15:37:44] Publishing message "Sample Message" to topic "tutorial/topic"...
-[15:37:44] Message published.
-[15:37:44] Disconnecting from Solace message router...
-[15:37:44] Disconnected.
+[15:38:18] Connecting to Solace message router using url: ws://192.168.133.64
+[15:38:18] Client username: testuser
+[15:38:18] Solace message router VPN name: default
+[15:38:19] === Successfully connected and ready to publish messages. ===
+[15:38:19] Publishing message "Sample Message" to topic "tutorial/topic"...
+[15:38:19] Message published.
+[15:38:19] Disconnecting from Solace message router...
+[15:38:19] Disconnected.
 ```
 
 This is the subscriber receiving a message (`TopicSubscriber.js)`:  
 
 ```bash
-[15:37:45] Received message: "Sample Message", details:
-Destination:                            TOPIC tutorial/topic
+[15:38:19] Received message: "Sample Message", details:
+Destination:                            [Topic tutorial/topic]
 Class Of Service:                       COS1
 DeliveryMode:                           DIRECT
-Binary Attachment:                      len=17
-  1c 11 53 61 6d 70 6c 65    20 4d 65 73 73 61 67 65    ..Sample.Message
-  00                                                    .
+Expiration:                             0 (Wed Dec 31 1969 19:00:00 GMT-0500 (Eastern Standard Time))
+Binary Attachment:                      len=14
+  53 61 6d 70 6c 65 20 4d    65 73 73 61 67 65          Sample.Message
 ```
 
 With that you now know how to successfully implement publish-subscribe message exchange pattern using Direct messages.

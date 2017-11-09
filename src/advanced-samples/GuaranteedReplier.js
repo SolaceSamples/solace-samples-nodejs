@@ -26,13 +26,13 @@
 
 /*jslint es6 devel:true node:true*/
 
-var GuaranteedReplier = function (solaceModule, requestQueueName) {
+var GuaranteedReplier = function (solaceModule, requestTopicName) {
     'use strict';
     var solace = solaceModule;
     var replier = {};
     replier.session = null;
-    replier.flow = null;
-    replier.requestQueueName = requestQueueName;
+    replier.messageConsumer = null;
+    replier.requestTopicName = requestTopicName;
     replier.active = false;
 
     // Logger
@@ -43,41 +43,47 @@ var GuaranteedReplier = function (solaceModule, requestQueueName) {
         console.log(timestamp + line);
     };
 
-    replier.log('\n*** replier to request queue "' + replier.requestQueueName + '" is ready to connect ***');
+    replier.log('\n*** replier to request topic "' + replier.requestTopicName + '" is ready to connect ***');
 
     // main function
     replier.run = function (argv) {
-        if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-            replier.connect(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-        } else {
-            replier.log('Cannot connect: expecting all arguments' +
-                ' <host:port> <client-username> <client-password> <message-vpn>.');
-        }
+        replier.connect(argv);
     };
 
     // Establishes connection to Solace message router
-    replier.connect = function (host, username, password, vpn) {
+    replier.connect = function (argv) {
         if (replier.session !== null) {
-            replier.log('Already connected and ready to subscribe to request topic.');
-        } else {
-            replier.connectToSolace(host, username, password, vpn);
+            replier.log('Already connected and ready to consume messages.');
+            return;
         }
-    };
-
-    replier.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        replier.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        replier.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        replier.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
-        // create session
-        replier.session = solace.SolclientFactory.createSession(sessionProperties);
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            replier.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        replier.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        replier.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        replier.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];        // create session
+        try {
+            replier.session = solace.SolclientFactory.createSession({
+                // solace.SessionProperties
+                url:      hosturl,
+                vpnName:  vpn,
+                userName: username,
+                password: pass,
+            });
+        } catch (error) {
+            replier.log(error.toString());
+        }
         // define session event listeners
         replier.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
-            replier.log('=== Successfully connected and ready to subscribe to request queue. ===');
+            replier.log('=== Successfully connected and ready to consume messages sent to request topic ===');
             replier.startService();
         });
         replier.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
@@ -96,24 +102,25 @@ var GuaranteedReplier = function (solaceModule, requestQueueName) {
         }
     };
 
-    // Subscribes to request topic on Solace message router
+    // Subscribes to temporary topic endpoint on Solace message router
     replier.startService = function () {
         if (replier.session !== null) {
             if (replier.active) {
-                replier.log('Replier already connected to "' + replier.requestQueueName + '" and ready to receive' +
+                replier.log('Replier already connected to temporary topic endpoint and ready to receive' +
                     ' messages.');
             } else {
-                replier.log('Replier connecting to request queue: ' + replier.requestQueueName);
                 try {
-                    var destination = new solace.Destination(replier.requestQueueName, solace.DestinationType.QUEUE);
-                    replier.flow = replier.session.createSubscriberFlow({
-                        endpoint: {destination, durable: solace.EndpointDurability.DURABLE},
+                    replier.messageConsumer = replier.session.createMessageConsumer({
+                        topicEndpointSubscription: replier.requestTopicName,
+                        queueDescriptor: { type: solace.QueueType.TOPIC_ENDPOINT, durable: false }
                     });
-                    replier.flow.on(solace.FlowEventName.MESSAGE, function onMessage(message) {
+                    replier.messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function onMessage(message) {
                         replier.reply(message);
                     });
-                    replier.flow.connect();
+                    replier.messageConsumer.connect();
                     replier.active = true;
+                    replier.log('Replier is consuming from temporary topic endpoint, which is attracting messages to '
+                        + replier.requestTopicName);
                 } catch (error) {
                     replier.log(error.toString());
                 }
@@ -158,16 +165,16 @@ var GuaranteedReplier = function (solaceModule, requestQueueName) {
         if (replier.session !== null) {
             if (replier.active) {
                 replier.active = false;
-                replier.log('Disconnecting from request queue: ' + replier.requestQueueName);
+                replier.log('Disconnecting from request topic endpoint: ' + replier.requestTopicName);
                 try {
-                    replier.flow.disconnect();
-                    replier.flow.dispose();
+                    replier.messageConsumer.disconnect();
+                    replier.messageConsumer.dispose();
                 } catch (error) {
                     replier.log(error.toString());
                 }
             } else {
-                replier.log('Cannot stop replier because it is not connected to request queue "' +
-                    replier.requestQueueName + '"');
+                replier.log('Cannot stop replier because it is not connected to request topic endpoint "' +
+                    replier.requestTopicName + '"');
             }
         } else {
             replier.log('Cannot stop replier because not connected to Solace message router.');
@@ -204,8 +211,8 @@ solace.SolclientFactory.init(factoryProps);
 // NOTICE: works only with ('solclientjs').debug
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
-// create the replier, specifying the name of the request topic
-var replier = new GuaranteedReplier(solace, 'tutorial/requestqueue');
+// create the replier, specifying the name of the request topic endpoint
+var replier = new GuaranteedReplier(solace, 'tutorial/requesttopic');
 
 // reply to messages on Solace message router
 replier.run(process.argv);

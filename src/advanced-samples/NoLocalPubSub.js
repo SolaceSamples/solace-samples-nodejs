@@ -20,11 +20,12 @@
 /**
  * Solace Systems Node.js API
  * NoLocal tutorial
- * Demonstrates the use of the NO_LOCAL Session and Flow properties.
+ * Demonstrates the use of the NO_LOCAL Session and MessageConsumer properties.
  *
  * This sample will:
  *  - Subscribe to a Topic for Direct messages on a Session with No Local delivery enabled.
- *  - Create a Flow to a Queue with No Local Delivery enabled on the Flow, but not on the Session.
+ *  - Create a message consumer to a Queue with No Local Delivery enabled on the Message Consumer,
+ *    but not on the Session.
  *  - Publish a Direct message on each Session, and verify it is not delivered locally.
  *  - Publish a message to the Queue on each Session, and verify it is not delivered locally.
  */
@@ -61,52 +62,56 @@ var NoLocalPubSub = function (solaceModule, topicName) {
     // Establishes connection to Solace message router
     sample.connect = function (argv) {
         if (sample.session1 !== null) {
-            sample.log('Already connected and ready to consume messages.');
-        } else {
-            if (argv.length >= (2 + 4)) { // expecting 4 real arguments
-                sample.connectToSolace(argv.slice(2)[0], argv.slice(3)[0], argv.slice(4)[0], argv.slice(5)[0]);
-            } else {
-                sample.log('Cannot connect: expecting all arguments' +
-                    ' <host:port> <client-username> <client-password> <message-vpn>.');
-            }
+            sample.log('Already connected and ready to start demo.');
+            return;
         }
-    };
-
-    sample.connectToSolace = function (host, username, password, vpn) {
-        const sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'ws://' + host;
-        sample.log('Connecting to Solace message router using WebSocket transport url ws://' + host);
-        sessionProperties.vpnName = vpn;
-        sample.log('Solace message router VPN name: ' + sessionProperties.vpnName);
-        sessionProperties.userName = username;
-        sample.log('Client username: ' + sessionProperties.userName);
-        sessionProperties.password = password;
+        // extract params
+        if (argv.length < (2 + 3)) { // expecting 3 real arguments
+            subscriber.log('Cannot connect: expecting all arguments' +
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+            return;
+        }
+        var hosturl = argv.slice(2)[0];
+        subscriber.log('Connecting to Solace message router using url: ' + hosturl);
+        var usernamevpn = argv.slice(3)[0];
+        var username = usernamevpn.split('@')[0];
+        subscriber.log('Client username: ' + username);
+        var vpn = usernamevpn.split('@')[1];
+        subscriber.log('Solace message router VPN name: ' + vpn);
+        var pass = argv.slice(4)[0];
+        // create session properties
+        var sessionProperties = new solace.SessionProperties({
+            url:      hosturl,
+            vpnName:  vpn,
+            userName: username,
+            password: pass,
+        });
         try {
-            // session 1: session level NoLocal is not set, consuming on queue with flow level NoLocal is SET
+            // session 1: session level NoLocal is not set,
+            // consuming on queue with message consumer level NoLocal is SET
             sessionProperties.noLocal = false;
-            sample.session1 = sample.createSession('Session1 (session NoLocal=false, flow consumer NoLocal=true)', sessionProperties, false, true);
+            sample.session1 = sample.createSession('Session1 (session NoLocal=false, ' +
+                'message consumer NoLocal=true)', sessionProperties, false, true);
             sample.session1.connect();
             // session 2: session level NoLocal is SET, will consume direct messages on topic
             sessionProperties.noLocal = true;
-            sample.session2 = sample.createSession('Session2 (session NoLocal=true, no flow consumer)', sessionProperties, true, false);
+            sample.session2 = sample.createSession('Session2 (session NoLocal=true, ' +
+                'no guaranteed message consumer)', sessionProperties, true, false);
             sample.session2.connect();
         } catch (error) {
             sample.log(error.toString());
         }
     };
 
-    sample.createSession = function (sessionName, sessionProperties, subscribeDirectTopic, consumeFlowQueue) {
+    sample.createSession = function (sessionName, sessionProperties,
+                                     subscribeDirectTopicFlag, consumeFlowQueueFlag) {
         // create session
         var session = null;
-        try {
-            session = solace.SolclientFactory.createSession(sessionProperties);
-        } catch (error) {
-            sample.log(error.toString());
-        }
+        session = solace.SolclientFactory.createSession(sessionProperties);
         // define session event listeners
         session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             sample.log(`=== ${sessionName} successfully connected ===`);
-            if (subscribeDirectTopic) {
+            if (subscribeDirectTopicFlag) {
                 if (!session.isCapable(solace.CapabilityType.NO_LOCAL)) {
                     sample.log('This sample requires an appliance with support for NO_LOCAL.');
                     sample.exit();
@@ -123,42 +128,44 @@ var NoLocalPubSub = function (solaceModule, topicName) {
                     sample.log(error.toString());
                 }
             };
-            if (consumeFlowQueue) {
+            if (consumeFlowQueueFlag) {
                 try {
-                    // Create a flow with NoLocal SET
-                    sample.queueDestination = session.createTemporaryQueue();
-                    var flow = session.createSubscriberFlow({
-                        endpoint: {destination: sample.queueDestination,
-                            durable: solace.EndpointDurability.NON_DURABLE_GUARANTEED,
-                            quotaMb: 100,
-                            maxMessageSize: 50000,
-                            permissions: solace.EndpointPermissions.DELETE,},
+                    // Create the message consumer with NoLocal SET
+                    var messageConsumer = session.createMessageConsumer({
+                        queueDescriptor: { type: solace.QueueType.QUEUE, durable: false },
+                        queueProperties: {
+                            permissions: solace.QueuePermissions.DELETE,
+                            quotaMB: 100,
+                            maxMessageSize: 50000 },
                         noLocal: true,
                     });
-                    // Define flow event listeners
-                    flow.on(solace.FlowEventName.UP, function () {
-                        sample.log(`=== ${sessionName} consumer flow to temporary queue is up. ===`);
+                    // Define message consumer event listeners
+                    messageConsumer.on(solace.MessageConsumerEventName.UP, function () {
+                        sample.log(`=== ${sessionName} message consumer to temporary queue is up. ===`);
+                        sample.queueDestination = messageConsumer.getDestination();
                         // start demo if both sessions up
                         if (sample.sessionsUp == 2) {
                             sample.startDemo();
                         }
                     });
                     // Define message event listener
-                    flow.on(solace.FlowEventName.MESSAGE, function (message) {
-                        sample.log(`Received ${message.getBinaryAttachment()}! - session: ${sessionName}, persistent message.`);
+                    messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function (message) {
+                        sample.log(`Received ${message.getBinaryAttachment()}! ` +
+                            `- session: ${sessionName}, guaranteed message.`);
                     });
-                    // Connect the flow
-                    flow.connect();
+                    // Connect the message consumer
+                    messageConsumer.connect();
                 } catch (error) {
                     sample.log(error.toString());
                 }
             };
             sample.sessionsUp++;
         });
-        if (subscribeDirectTopic) {
+        if (subscribeDirectTopicFlag) {
             // define message event listener
-            session.on(solace.SessionEventCode.MESSAGE, (message) => {
-                sample.log(`Received ${message.getBinaryAttachment()}! - session: ${sessionName}, direct message.`);
+            session.on(solace.SessionEventCode.MESSAGE, function (message) {
+                sample.log(`Received ${message.getBinaryAttachment()}! - ` +
+                    `session: ${sessionName}, direct message.`);
             });
         };
         session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
@@ -172,14 +179,27 @@ var NoLocalPubSub = function (solaceModule, topicName) {
     };
 
     sample.startDemo = function () {
-        sample.log('Sending Message1: direct message from Session1, expecting it is received by Session2');
-        sample.sendMessage(sample.session1, 'Message1', sample.topicDestination, solace.MessageDeliveryModeType.DIRECT);
-        sample.log('Sending Message2: persistent message from Session1, expecting it is NOT received by Session1 flow');
-        sample.sendMessage(sample.session1, 'Message2', sample.queueDestination, solace.MessageDeliveryModeType.PERSISTENT);
-        sample.log('Sending Message3: direct message from Session2, expecting it is NOT received by local Session2');
-        sample.sendMessage(sample.session2, 'Message3', sample.topicDestination, solace.MessageDeliveryModeType.DIRECT);
-        sample.log('Sending Message4: persistent message from Session2, expecting it is received by flow on Session1');
-        sample.sendMessage(sample.session2, 'Message4', sample.queueDestination, solace.MessageDeliveryModeType.PERSISTENT);
+        // Demo 1
+        sample.log('Sending Message1: direct message from Session1, ' +
+            'expecting it is received by Session2');
+        sample.sendMessage(sample.session1, 'Message1', sample.topicDestination,
+            solace.MessageDeliveryModeType.DIRECT);
+        // Demo 2
+        sample.log('Sending Message2: guaranteed message from Session1, ' +
+            'expecting it is NOT received by Session1 message consumer');
+        sample.sendMessage(sample.session1, 'Message2', sample.queueDestination,
+            solace.MessageDeliveryModeType.PERSISTENT);
+        // Demo 3
+        sample.log('Sending Message3: direct message from Session2, ' +
+            'expecting it is NOT received by local Session2');
+        sample.sendMessage(sample.session2, 'Message3', sample.topicDestination,
+            solace.MessageDeliveryModeType.DIRECT);
+        // Demo 4
+        sample.log('Sending Message4: guaranteed message from Session2, ' +
+            'expecting it is received by message consumer on Session1');
+        sample.sendMessage(sample.session2, 'Message4', sample.queueDestination,
+            solace.MessageDeliveryModeType.PERSISTENT);
+        // wait
         setTimeout(function () {
             sample.exit();
         }, 2000); // tear down in 2 seconds
@@ -217,7 +237,8 @@ var NoLocalPubSub = function (solaceModule, topicName) {
     return sample;
 };
 
-var solace = require('solclientjs').debug; // logging supported
+var solace = require("../../../../core/index.js");
+// var solace = require('solclientjs').debug; // logging supported
 
 // Initialize factory with the most recent API defaults
 var factoryProps = new solace.SolclientFactoryProperties();
