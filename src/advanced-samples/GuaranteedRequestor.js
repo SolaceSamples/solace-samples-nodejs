@@ -161,8 +161,7 @@ var GuaranteedRequestor = function (solaceModule, requestTopicName) {
     return requestor;
 };
 
-var solace = require("../../../../core/index.js");
-// var solace = require('solclientjs').debug; // logging supported
+var solace = require('solclientjs').debug; // logging supported
 
 // Initialize factory with the most recent API defaults
 var factoryProps = new solace.SolclientFactoryProperties();

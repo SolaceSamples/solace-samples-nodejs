@@ -67,17 +67,17 @@ var NoLocalPubSub = function (solaceModule, topicName) {
         }
         // extract params
         if (argv.length < (2 + 3)) { // expecting 3 real arguments
-            subscriber.log('Cannot connect: expecting all arguments' +
+            sample.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
             return;
         }
         var hosturl = argv.slice(2)[0];
-        subscriber.log('Connecting to Solace message router using url: ' + hosturl);
+        sample.log('Connecting to Solace message router using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
-        subscriber.log('Client username: ' + username);
+        sample.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        subscriber.log('Solace message router VPN name: ' + vpn);
+        sample.log('Solace message router VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session properties
         var sessionProperties = new solace.SessionProperties({
@@ -237,8 +237,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
     return sample;
 };
 
-var solace = require("../../../../core/index.js");
-// var solace = require('solclientjs').debug; // logging supported
+var solace = require('solclientjs').debug; // logging supported
 
 // Initialize factory with the most recent API defaults
 var factoryProps = new solace.SolclientFactoryProperties();
