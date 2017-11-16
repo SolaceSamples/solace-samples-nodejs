@@ -224,6 +224,7 @@ var BasicReplier = function (solaceModule, topicName) {
     return replier;
 };
 
+//Note - For older versions, the naming of this debug file may differ.
 var solace = require('./lib/solclient-debug');
 
 // enable logging to JavaScript console at WARN level

@@ -267,6 +267,8 @@ This tutorial is available in GitHub.  To get started, clone the GitHub reposito
 
 The samples consist of two separate publisher and subscriber Node.js applications: `TopicPublisher.js` and `TopicSubsciber.js`.
 
+Note - in the line `var solace = require('./lib/solclient-debug');`, the naming of the debug file may differ depending on the version of the Solace NodeJS library.
+
 Each application is bootstrapped by calling the `run` function with four application arguments that is expected to be the Solace message router IP address with its web connection port, the vpn name, the client username, and the client password.
 
 In the publisher `TopicPublish.js`:

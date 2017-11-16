@@ -187,6 +187,7 @@ var BasicRequestor = function (solaceModule, topicName) {
     return requestor;
 };
 
+//Note - For older versions, the naming of this debug file may differ.
 var solace = require('./lib/solclient-debug');
 
 // enable logging to JavaScript console at WARN level

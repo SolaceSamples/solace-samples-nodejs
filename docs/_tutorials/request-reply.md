@@ -278,6 +278,8 @@ Combining the example source code shown above results in the following source co
 
 The samples consist of two separate requestor and replier Node.js applications _(BasicRequestor.js_ and _BasicReplier.js)_.
 
+Note - in the line `var solace = require('./lib/solclient-debug');`, the naming of the debug file may differ depending on the version of the Solace NodeJS library.
+
 Application is bootstrapped by calling the _run_ function with four application arguments that is expected to be the Solace message router IP address with its web connection port, the vpn name, the client username, and the client password.
 
 In the requestor (_BasicRequestor.js_):
