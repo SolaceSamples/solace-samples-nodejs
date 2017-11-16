@@ -3,6 +3,11 @@ layout: tutorials
 title: Request/Reply
 summary: Learn how to set up request/reply messaging.
 icon: I_dev_R+R.svg
+links:
+    - label: BasicRequestor.js
+      link: /blob/master/src/BasicRequestor.js
+    - label: BasicReplier.js
+      link: /blob/master/src/BasicReplier.js
 ---
 
 This tutorial outlines both roles in the request-response message exchange pattern. It will show you how to act as the client by creating a request, sending it and waiting for the response. It will also show you how to act as the server by receiving incoming requests, creating a reply and sending it back to the client. It builds on the basic concepts introduced in [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe).
@@ -12,11 +17,15 @@ This tutorial outlines both roles in the request-response message exchange patte
 This tutorial assumes the following:
 
 *   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
-*   You have access to a running Solace message router with the following configuration:
-    *   Enabled message VPN
-    *   Enabled client username
+*   You have access to Solace messaging with the following configuration details:
+    *   Connectivity information for a Solace message-VPN
+    *   Enabled client username and password
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
+{% if jekyll.environment == 'solaceCloud' %}
+One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
+{% else %}
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
+{% endif %}
 
 ## Goals
 
@@ -42,31 +51,12 @@ For request-reply messaging to be successful it must be possible for the request
 
 For direct messages however, this is simplified through the use of the `Requestor` object as shown in this sample.
 
-## Obtaining the Solace API
-
-This tutorial depends on you having the Solace Systems Node.js API downloaded and available. The Solace Systems Node.js API distribution package can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The Node.js API is distributed as a zip file containing the required JavaScript files, API documentation, and examples. The instructions in this tutorial assume you have downloaded the Node.js API library and unpacked it to a known location.
-
-## Loading Solace Systems Node.js API
-
-To load the Solace Systems Node.js API into your Node.js application simply include the `lib/solclientjs` module from the distribution.
-
-```javascript
-var solace = require('./lib/solclientjs');
-```
-
-Use the debug version of the API in `lib/solclientjs-debug` module instead, if you’re planning to see console log messages and/or debug it.
-
-```javascript
-var solace = require('./lib/solclientjs-debug');
-```
-
-If the debug version is used, it is necessary to initialize `solace.SolclientFactory` with required level of logging like so:
-
-```javascript
-var factoryProps = new solace.SolclientFactoryProperties();
-factoryProps.logLevel = solace.LogLevel.WARN;
-solace.SolclientFactory.init(factoryProps);
-```
+{% if jekyll.environment == 'solaceCloud' %}
+  {% include solaceMessaging-cloud.md %}
+{% else %}
+    {% include solaceMessaging.md %}
+{% endif %}  
+{% include solaceApi.md %}
 
 ## Connecting to the Solace message router
 
@@ -84,9 +74,10 @@ The following is an example of session creating and connecting to the Solace mes
 
 ```javascript
 var sessionProperties = new solace.SessionProperties();
-sessionProperties.url = 'http://' + host;
-sessionProperties.vpnName = 'default';
-sessionProperties.userName = 'tutorial';
+sessionProperties.url = 'ws://' + host;
+sessionProperties.vpnName = vpnname;
+sessionProperties.userName = username;
+sessionProperties.password = password;
 requestor.session = solace.SolclientFactory.createSession(
     sessionProperties,
     new solace.MessageRxCBInfo(function (session, message) {
@@ -277,20 +268,29 @@ requestor.requestFailedCb = function (session, event) {
 
 Combining the example source code shown above results in the following source code files:
 
-*   [BasicRequestor.js]({{ site.repository }}/blob/master/src/BasicRequestor.js)
-*   [BasicReplier.js]({{ site.repository }}/blob/master/src/BasicReplier.js)
+<ul>
+{% for item in page.links %}
+<li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
+{% endfor %}
+</ul>
 
 ### Running samples
 
 The samples consist of two separate requestor and replier Node.js applications _(BasicRequestor.js_ and _BasicReplier.js)_.
 
-Application is bootstrapped by calling the _run_ function with one application argument that is expected to be the Solace message router IP address with its web connection port.
+Note - in the line `var solace = require('./lib/solclient-debug');`, the naming of the debug file may differ depending on the version of the Solace NodeJS library.
+
+Application is bootstrapped by calling the _run_ function with four application arguments that is expected to be the Solace message router IP address with its web connection port, the vpn name, the client username, and the client password.
 
 In the requestor (_BasicRequestor.js_):
 
 ```javascript
 var requestor = new BasicRequestor(solace, 'tutorial/topic');
-requestor.run(process.argv.slice(2)[0]);
+var host = process.argv.slice(2)[0];
+var vpnname = split[1];
+var username = split[0];
+var password = process.argv.slice(4)[0];
+requestor.run(host, vpnname, username, password);
 ```
 
 In the replier (_BasicReplier.js_):
@@ -298,7 +298,11 @@ In the replier (_BasicReplier.js_):
 ```javascript
 var BasicReplier = require('./BasicReplier');
 var replier = new BasicReplier(solace, 'tutorial/topic');
-replier. replyOnSolace (process.argv.slice(2)[0]);;
+var host = process.argv.slice(2)[0];
+var vpnname = split[1];
+var username = split[0];
+var password = process.argv.slice(4)[0];
+replier. replyOnSolace (host, vpnname, username, password);;
 ```
 
 Both applications logic is triggered only after receiving the `solace.SessionEventCode.UP_NOTICE` event as demonstrated above.
@@ -307,13 +311,13 @@ The requestor application sends one request, receives a reply to it and exits, t
 
 **Sample Output**
 
-First run _BasicReplier.js_ in Node.js, giving it one argument (the Solace message router’s URL).
+First run _BasicReplier.js_ in Node.js, giving it arguments for the router’s connection properties (<host> <username>@<vpnname> <password>).
 
 The following is a screenshot of the tutorial’s _BasicReplier.js_ application after it successfully connected to the Solace message router and subscribed to the request topic.
 
 ![]({{ site.baseurl }}/images/nodejs-reqrep-img-1.png)
 
-Now, run _BasicRequestor.js_ in Node.js, also specifying the Solace message router’s URL.
+Now, run _BasicRequestor.js_ in Node.js, also specifying the router’s connection properties.
 
 It will connect to the router, send a request, receive a reply and exit.
 

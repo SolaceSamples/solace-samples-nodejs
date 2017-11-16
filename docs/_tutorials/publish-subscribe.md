@@ -1,22 +1,31 @@
 ---
 layout: tutorials
 title: Publish/Subscribe
-summary: Learn how to set up pub/sub messaging on a Solace VMR.
+summary: Learn to publish and subscribe to messages.
 icon: I_dev_P+S.svg
+links:
+    - label: TopicPublisher.js
+      link: /blob/master/src/TopicPublisher.js
+    - label: TopicSubscriber.js
+      link: /blob/master/src/TopicSubscriber.js
 ---
 
-This tutorial will introduce you to the fundamentals of the Solace Systems Node.js API by connecting a client, adding a topic subscription and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange illustrated here:
+This tutorial will introduce you to the fundamentals of the Solace API by connecting a client, adding a topic subscription and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange.
 
 ## Assumptions
 
 This tutorial assumes the following:
 
 *   You are familiar with Solace [core concepts]({{ site.docs-core-concepts }}){:target="_top"}.
-*   You have access to a running Solace message router with the following configuration:
-    *   Enabled message VPN
-    *   Enabled client username
+*   You have access to Solace messaging with the following configuration details:
+    *   Connectivity information for a Solace message-VPN
+    *   Enabled client username and password
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
+{% if jekyll.environment == 'solaceCloud' %}
+One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
+{% else %}
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
+{% endif %}
 
 ## Goals
 
@@ -25,70 +34,12 @@ The goal of this tutorial is to demonstrate the most basic messaging interaction
 1.  How to build and send a message on a topic
 2.  How to subscribe to a topic and receive a message
 
-## Solace message router properties
-
-In order to send or receive messages to a Solace message router, you need to know a few details of how to connect to the Solace message router. Specifically you need to know the following:
-
-<table>
-<tbody>
-<tr>
-<td>Resource</td>
-<td>Value</td>
-<td>Description</td>
-</tr>
-<tr>
-<td>Host</td>
-<td>String of the form <code>DNS name</code> or <code>IP:Port</code></td>
-<td>This is the address client’s use when connecting to the Solace message router to send and receive messages. For a Solace VMR this there is only a single interface so the IP is the same as the management IP address.
-
-For Solace message router appliances this is the host address of the message-backbone.
-</td>
-</tr>
-<tr>
-<td>Message VPN</td>
-<td>String</td>
-<td>The Solace message router Message VPN that this client should connect to. The simplest option is to use the “default” message-vpn which is present on all Solace message routers and fully enabled for message traffic on Solace VMRs.</td>
-</tr>
-<tr>
-<td>Client Username</td>
-<td>String</td>
-<td>The client username. For the Solace VMR default message VPN, authentication is disabled by default, so this can be any value.</td>
-</tr>
-<tr>
-<td>Client Password</td>
-<td>String</td>
-<td>The optional client password. For the Solace VMR default message VPN, authentication is disabled by default, so this can be any value or omitted.</td>
-</tr>
-</tbody>
-</table>
-
-For the purposes of this tutorial, you will connect to the default message VPN of a Solace VMR so the only required information to proceed is the Solace VMR host string which this tutorial accepts as an argument.
-
-## Obtaining the Solace API
-
-This tutorial depends on you having the Solace Systems Node.js API downloaded and available. The Solace Systems Node.js API distribution package can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The Node.js API is distributed as a zip file containing the required JavaScript files, API documentation, and examples. The instructions in this tutorial assume you have downloaded the Node.js API library and unpacked it to a known location.
-
-## Loading Solace Systems Node.js API
-
-To load the Solace Systems Node.js API into your Node.js application simply include the `lib/solclientjs` module from the distribution.
-
-```javascript
-var solace = require('./lib/solclientjs');
-```
-
-Use the debug version of the API in `lib/solclientjs-debug` module instead, if you’re planning to see console log messages and/or debug it.
-
-```javascript
-var solace = require('./lib/solclientjs-debug');
-```
-
-If the debug version is used, it is necessary to initialize solace.SolclientFactory with required level of logging like so:
-
-```javascript
-var factoryProps = new solace.SolclientFactoryProperties();
-factoryProps.logLevel = solace.LogLevel.WARN;
-solace.SolclientFactory.init(factoryProps);
-```
+{% if jekyll.environment == 'solaceCloud' %}
+  {% include solaceMessaging-cloud.md %}
+{% else %}
+    {% include solaceMessaging.md %}
+{% endif %}  
+{% include solaceApi.md %}
 
 ## Connecting to the Solace message router
 
@@ -106,9 +57,10 @@ The following is an example of session creating and connecting to the Solace mes
 
 ```javascript
 var sessionProperties = new solace.SessionProperties();
-sessionProperties.url = 'http://' + host;
-sessionProperties.vpnName = 'default';
-sessionProperties.userName = 'tutorial';
+sessionProperties.url = 'ws://' + host;
+sessionProperties.vpnName = vpnname;
+sessionProperties.userName = username;
+sessionProperties.password = password;
 publisher.session = solace.SolclientFactory.createSession(
     sessionProperties,
     new solace.MessageRxCBInfo(function (session, message) {
@@ -303,29 +255,42 @@ At this point a message to the Solace message router has been sent and your wait
 
 ## Summarizing
 
-Combining the example source code shown above results in the following source code files:
+This tutorial is available in GitHub.  To get started, clone the GitHub repository containing the Solace samples.
 
-*   [TopicPublisher.js]({{ site.repository }}/blob/master/src/TopicPublisher.js)
-*   [TopicSubscriber.js]({{ site.repository }}/blob/master/src/TopicSubscriber.js)
+<ul>
+{% for item in page.links %}
+<li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
+{% endfor %}
+</ul>
 
 ### Running samples
 
 The samples consist of two separate publisher and subscriber Node.js applications: `TopicPublisher.js` and `TopicSubsciber.js`.
 
-Each application is bootstrapped by calling the `run` function with one application argument that is expected to be the Solace message router IP address with its web connection port.
+Note - in the line `var solace = require('./lib/solclient-debug');`, the naming of the debug file may differ depending on the version of the Solace NodeJS library.
+
+Each application is bootstrapped by calling the `run` function with four application arguments that is expected to be the Solace message router IP address with its web connection port, the vpn name, the client username, and the client password.
 
 In the publisher `TopicPublish.js`:
 
 ```javascript
 var publisher = new TopicPublisher(solace, 'tutorial/topic');
-publisher.run(process.argv.slice(2)[0]);
+var host = process.argv.slice(2)[0];
+var vpnname = split[1];
+var username = split[0];
+var password = process.argv.slice(4)[0];
+publisher.run(host, vmrname, username, password);
 ```
 
 In the subscriber `TopicSubscribe.js`:
 
 ```javascript
 var subscriber = new TopicSubscriber(solace, 'tutorial/topic');
-subscriber.run(process.argv.slice(2)[0]);;
+var host = process.argv.slice(2)[0];
+var vpnname = split[1];
+var username = split[0];
+var password = process.argv.slice(4)[0];
+subscriber.run(host, vmrname, username, password);
 ```
 
 Both applications logic is triggered only after receiving the `solace.SessionEventCode.UP_NOTICE` event as demonstrated above.
@@ -334,13 +299,13 @@ The publisher application publishes one message and exits, the subscriber applic
 
 ### Sample Output
 
-First run `TopicSubscriber.js` in Node.js, giving it one argument (the Solace message router’s URL).
+First run `TopicSubscriber.js` in Node.js, giving it arguments for the router’s connection properties (<host> <username>@<vpnname> <password>)
 
 The following is a screenshot of the tutorial’s `TopicSubscriber.js` application after it successfully connected to the Solace message router and subscribed to the subscription topic.  
 
 ![]({{ site.baseurl }}/images/nodejs-pubsub-img-1.png)
 
-Now, run `TopicPublisher.js` in Node.js, also specifying the Solace message router’s URL.
+Now, run `TopicPublisher.js` in Node.js, also specifying the router’s connection properties
 
 It will connect to the router, publish a message and exit.
 

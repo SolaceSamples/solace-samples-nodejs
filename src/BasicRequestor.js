@@ -83,15 +83,23 @@ var BasicRequestor = function (solaceModule, topicName) {
     };
 
     requestor.connectToSolace = function (host) {
-        requestor.log('Connecting to Solace message router web transport URL ' + host + '.');
         var sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'http://' + host;
-        // NOTICE: the Solace message router VPN name
-        sessionProperties.vpnName = 'default';
-        requestor.log('Solace message router VPN name: ' + sessionProperties.vpnName);
+        if (host.lastIndexOf('ws://', 0) === 0) { 
+            sessionProperties.url = host;
+        } else {
+            sessionProperties.url = 'ws://' + host;
+        }
+        requestor.log('Connecting to Solace message router web transport URL ' + sessionProperties.url);
+        // NOTICE: the Solace router VPN name
+        sessionProperties.vpnName = vpnname;
+        requestor.log('Solace router VPN name: ' + sessionProperties.vpnName);
         // NOTICE: the client username
-        sessionProperties.userName = 'tutorial';
+        sessionProperties.userName = username;
         requestor.log('Client username: ' + sessionProperties.userName);
+        //NOTICE: the client password
+        if (password) {
+            sessionProperties.password = password;
+        }
         requestor.session = solace.SolclientFactory.createSession(
             sessionProperties,
             new solace.MessageRxCBInfo(function (session, request) {
@@ -179,7 +187,8 @@ var BasicRequestor = function (solaceModule, topicName) {
     return requestor;
 };
 
-var solace = require('./lib/solclientjs-debug');
+//Note - For older versions, the naming of this debug file may differ.
+var solace = require('./lib/solclient-debug');
 
 // enable logging to JavaScript console at WARN level
 // NOTICE: works only with "lib/solclientjs-debug.js"
@@ -190,5 +199,12 @@ solace.SolclientFactory.init(factoryProps);
 // create the requestor, specifying the name of the request topic
 var requestor = new BasicRequestor(solace, 'tutorial/topic');
 
+var split = process.argv.slice(3)[0].split('@');
+
+var host = process.argv.slice(2)[0];
+var vpnname = split[1];
+var username = split[0];
+var password = process.argv.slice(4)[0];
+
 // send request to Solace message router
-requestor.run(process.argv.slice(2)[0]);
+requestor.run(host, vpnname, username, password);

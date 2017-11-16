@@ -44,8 +44,8 @@ var BasicReplier = function (solaceModule, topicName) {
     replier.log('\n*** replier to topic "' + replier.topicName + '" is ready to connect ***');
 
     // main function
-    replier.run = function (hostname) {
-        replier.connect(hostname);
+    replier.run = function (hostname, vpnname, username, password) {
+        replier.connect(hostname, vpnname, username, password);
     };
 
     replier.reply = function (message) {
@@ -101,28 +101,36 @@ var BasicReplier = function (solaceModule, topicName) {
     };
 
     // Establishes connection to Solace message router
-    replier.connect = function (host) {
+    replier.connect = function (host, vpnname, username, password) {
         if (replier.session !== null) {
             replier.log('Already connected and ready to subscribe to request topic.');
         } else {
             if (host) {
-                replier.connectToSolace(host);
+                replier.connectToSolace(host, vpnname, username, password);
             } else {
                 replier.log('Cannot connect: please specify the Solace message router web transport URL.');
             }
         }
     };
 
-    replier.connectToSolace = function (host) {
-        replier.log('Connecting to Solace message router web transport URL ' + host + '.');
+    replier.connectToSolace = function (host, vpnname, username, password) {
         var sessionProperties = new solace.SessionProperties();
-        sessionProperties.url = 'http://' + host;
-        // NOTICE: the Solace message router VPN name
-        sessionProperties.vpnName = 'default';
-        replier.log('Solace message router VPN name: ' + sessionProperties.vpnName);
+        if (host.lastIndexOf('ws://', 0) === 0) { 
+            sessionProperties.url = host;
+        } else {
+            sessionProperties.url = 'ws://' + host;
+        }
+        replier.log('Connecting to Solace message router web transport URL ' + sessionProperties.url);
+        // NOTICE: the Solace router VPN name
+        sessionProperties.vpnName = vpnname;
+        replier.log('Solace router VPN name: ' + sessionProperties.vpnName);
         // NOTICE: the client username
-        sessionProperties.userName = 'tutorial';
+        sessionProperties.userName = username;
         replier.log('Client username: ' + sessionProperties.userName);
+        //NOTICE: the client password
+        if (password) {
+            sessionProperties.password = password;
+        }
         replier.session = solace.SolclientFactory.createSession(
             sessionProperties,
             new solace.MessageRxCBInfo(function (session, message) {
@@ -216,7 +224,8 @@ var BasicReplier = function (solaceModule, topicName) {
     return replier;
 };
 
-var solace = require('./lib/solclientjs-debug');
+//Note - For older versions, the naming of this debug file may differ.
+var solace = require('./lib/solclient-debug');
 
 // enable logging to JavaScript console at WARN level
 // NOTICE: works only with "lib/solclientjs-debug.js"
@@ -227,8 +236,15 @@ solace.SolclientFactory.init(factoryProps);
 // create the replier, specifying the name of the request topic
 var replier = new BasicReplier(solace, 'tutorial/topic');
 
+var split = process.argv.slice(3)[0].split('@');
+
+var host = process.argv.slice(2)[0];
+var vpnname = split[1];
+var username = split[0];
+var password = process.argv.slice(4)[0];
+
 // reply to messages on Solace message router
-replier.run(process.argv.slice(2)[0]);
+replier.run(host, vpnname, username, password);
 
 // wait to be told to exit
 replier.log("Press Ctrl-C to exit");
