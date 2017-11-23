@@ -52,7 +52,7 @@ var GuaranteedRequestor = function (solaceModule, requestTopicName) {
     // Establishes connection to Solace message router
     requestor.connect = function (argv) {
         if (requestor.session !== null) {
-            requestor.log('Already connected and ready to consume messages.');
+            requestor.log('Already connected and ready to send requests.');
             return;
         }
         // extract params

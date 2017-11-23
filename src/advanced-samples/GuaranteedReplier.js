@@ -53,7 +53,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
     // Establishes connection to Solace message router
     replier.connect = function (argv) {
         if (replier.session !== null) {
-            replier.log('Already connected and ready to consume messages.');
+            replier.log('Already connected and ready to subscribe to request topic.');
             return;
         }
         // extract params

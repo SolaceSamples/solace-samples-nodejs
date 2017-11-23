@@ -96,7 +96,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
             // session 2: session level NoLocal is SET, will consume direct messages on topic
             sessionProperties.noLocal = true;
             sample.session2 = sample.createSession('Session2 (session NoLocal=true, ' +
-                'no guaranteed message consumer)', sessionProperties, true, false);
+                'direct message consumer)', sessionProperties, true, false);
             sample.session2.connect();
         } catch (error) {
             sample.log(error.toString());
@@ -110,62 +110,54 @@ var NoLocalPubSub = function (solaceModule, topicName) {
         session = solace.SolclientFactory.createSession(sessionProperties);
         // define session event listeners
         session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
-            sample.log(`=== ${sessionName} successfully connected ===`);
+            sample.log('=== ' + sessionName + ' successfully connected ===');
             if (subscribeDirectTopicFlag) {
                 if (!session.isCapable(solace.CapabilityType.NO_LOCAL)) {
                     sample.log('This sample requires an appliance with support for NO_LOCAL.');
                     sample.exit();
                 }
-                try {
-                    session.subscribe(
-                        sample.topicDestination,
-                        false, // not interested in confirmation this time
-                        '', // not used
-                        10000 // 10 seconds timeout for this operation
-                    );
-                    sample.log('Subscribed to topic: ' + sample.topicName);
-                } catch (error) {
-                    sample.log(error.toString());
-                }
+                session.subscribe(
+                    sample.topicDestination,
+                    false, // not interested in confirmation this time
+                    '', // not used
+                    10000 // 10 seconds timeout for this operation
+                );
+                sample.log('Subscribed to topic: ' + sample.topicName);
             };
             if (consumeFlowQueueFlag) {
-                try {
-                    // Create the message consumer with NoLocal SET
-                    var messageConsumer = session.createMessageConsumer({
-                        queueDescriptor: { type: solace.QueueType.QUEUE, durable: false },
-                        queueProperties: {
-                            permissions: solace.QueuePermissions.DELETE,
-                            quotaMB: 100,
-                            maxMessageSize: 50000 },
-                        noLocal: true,
-                    });
-                    // Define message consumer event listeners
-                    messageConsumer.on(solace.MessageConsumerEventName.UP, function () {
-                        sample.log(`=== ${sessionName} message consumer to temporary queue is up. ===`);
-                        sample.queueDestination = messageConsumer.getDestination();
-                        // start demo if both sessions up
-                        if (sample.sessionsUp == 2) {
-                            sample.startDemo();
-                        }
-                    });
-                    // Define message event listener
-                    messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function (message) {
-                        sample.log(`Received ${message.getBinaryAttachment()}! ` +
-                            `- session: ${sessionName}, guaranteed message.`);
-                    });
-                    // Connect the message consumer
-                    messageConsumer.connect();
-                } catch (error) {
-                    sample.log(error.toString());
-                }
+                // Create the message consumer with NoLocal SET
+                var messageConsumer = session.createMessageConsumer({
+                    queueDescriptor: { type: solace.QueueType.QUEUE, durable: false },
+                    queueProperties: {
+                        permissions: solace.QueuePermissions.DELETE,
+                        quotaMB: 100,
+                        maxMessageSize: 50000 },
+                    noLocal: true,
+                });
+                // Define message consumer event listeners
+                messageConsumer.on(solace.MessageConsumerEventName.UP, function () {
+                    sample.log('=== ' + sessionName + ' consumer flow to temporary queue is up. ===');
+                    sample.queueDestination = messageConsumer.getDestination();
+                    // start demo if both sessions up
+                    if (sample.sessionsUp === 2) {
+                        sample.startDemo();
+                    }
+                });
+                // Define message event listener
+                messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function (message) {
+                    sample.log('Received ' + message.getBinaryAttachment() + '! - session: ' + sessionName + ', ' +
+                        'guaranteed message.');
+                });
+                // Connect the message consumer
+                messageConsumer.connect();
             };
             sample.sessionsUp++;
         });
         if (subscribeDirectTopicFlag) {
             // define message event listener
             session.on(solace.SessionEventCode.MESSAGE, function (message) {
-                sample.log(`Received ${message.getBinaryAttachment()}! - ` +
-                    `session: ${sessionName}, direct message.`);
+                sample.log('Received ' + message.getBinaryAttachment() + '! - session: ' + sessionName + ',' +
+                    'direct message.');
             });
         };
         session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {

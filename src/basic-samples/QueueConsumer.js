@@ -128,6 +128,10 @@ var QueueConsumer = function (solaceModule, queueName) {
                     });
                     consumer.messageConsumer.on(solace.MessageConsumerEventName.DOWN, function () {
                         consumer.consuming = false;
+                        consumer.log('=== The message consumer is now down ===');
+                    });
+                    consumer.messageConsumer.on(solace.MessageConsumerEventName.DOWN_ERROR, function () {
+                        consumer.consuming = false;
                         consumer.log('=== An error happened, the message consumer is down ===');
                     });
                     // Define message received event listener

@@ -26,12 +26,12 @@
 
 /*jslint es6 node:true devel:true*/
 
-var EventSubscriber = function (solaceModule, topicName) {
+var EventSubscriber = function (solaceModule) {
     'use strict';
     var solace = solaceModule;
     var subscriber = {};
     subscriber.session = null;
-    subscriber.topicName = topicName;
+    subscriber.topicName = null;
     subscriber.subscribed = false;
 
     // Logger
@@ -43,7 +43,7 @@ var EventSubscriber = function (solaceModule, topicName) {
         console.log(timestamp + line);
     };
 
-    subscriber.log('\n*** Subscriber to topic "' + subscriber.topicName + '" is ready to connect ***');
+    subscriber.log('\n*** Event Monitor is ready to connect ***');
 
     // main function
     subscriber.run = function (argv) {
@@ -126,10 +126,12 @@ var EventSubscriber = function (solaceModule, topicName) {
             if (subscriber.subscribed) {
                 subscriber.log('Already subscribed to "' + subscriber.topicName + '" and ready to receive messages.');
             } else {
+                var routername = subscriber.session.getCapability(solace.CapabilityType.PEER_ROUTER_NAME).getValue();
+                subscriber.topicName = '#LOG/INFO/CLIENT/' + routername + '/CLIENT_CLIENT_CONNECT/>';
                 subscriber.log('Subscribing to topic: ' + subscriber.topicName);
                 try {
                     subscriber.session.subscribe(
-                        solace.SolclientFactory.createTopic(subscriber.topicName),
+                        solace.SolclientFactory.createTopicDestination(subscriber.topicName),
                         true, // generate confirmation when subscription is added successfully
                         subscriber.topicName, // use topic name as correlation key
                         10000 // 10 seconds timeout for this operation
@@ -158,7 +160,7 @@ var EventSubscriber = function (solaceModule, topicName) {
                 subscriber.log('Unsubscribing from topic: ' + subscriber.topicName);
                 try {
                     subscriber.session.unsubscribe(
-                        solace.SolclientFactory.createTopic(subscriber.topicName),
+                        solace.SolclientFactory.createTopicDestination(subscriber.topicName),
                         true, // generate confirmation when subscription is removed successfully
                         subscriber.topicName, // use topic name as correlation key
                         10000 // 10 seconds timeout for this operation
@@ -203,7 +205,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the subscriber, specifying the name of the event topic
-var subscriber = new EventSubscriber(solace, '#LOG/INFO/CLIENT/*/CLIENT_CLIENT_CONNECT/>');
+var subscriber = new EventSubscriber(solace);
 
 // subscribe to messages on Solace message router
 subscriber.run(process.argv);
