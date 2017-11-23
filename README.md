@@ -12,7 +12,7 @@ These tutorials will get you up to speed and sending messages with Solace techno
 This repository contains:
 
 * Code and matching tutorial walk throughs for five different **basic** Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
-* Additional code showing how to make use of **advanced** features of the Solace message-router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples). For details about the Solace API, refer to the [Customer Documentation - Developer Guide](http://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm).
+* Additional code: showing how to make use of **advanced** features of the Solace message-router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples). For details about the Solace API, refer to the [Customer Documentation - Developer Guide](http://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm).
 
 ## Checking out
 
