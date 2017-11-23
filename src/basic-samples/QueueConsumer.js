@@ -58,7 +58,8 @@ var QueueConsumer = function (solaceModule, queueName) {
         // extract params
         if (argv.length < (2 + 3)) { // expecting 3 real arguments
             consumer.log('Cannot connect: expecting all arguments' +
-                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.');
+                ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
+                'Available protocols are ws://, wss://, http://, https://');
             return;
         }
         var hosturl = argv.slice(2)[0];
