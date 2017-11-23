@@ -31,7 +31,7 @@ The goal of this tutorial is to understand the following:
 In order to send guaranteed messages to a Solace message router with no chance of message loss, it is absolutely necessary to properly process the acknowledgements that come back from the Solace message router. These acknowledgements will let you know if the message was accepted by the Solace message router or if it was rejected. If it is rejected, the acknowledgement will also contain exact details of why it was rejected. For example, you may not have permission to send guaranteed messages or queue destination may not exist etc.
 
 In order to properly handle message acknowledgements it is also important to know which message is being acknowledged. In other words, applications often need some application context along with the acknowledgement from the Solace message router to properly process the business logic on their end. The Solace Node.js API enables this through emitting a session event called `ACKNOWLEDGED_MESSAGE` when a message is successfully acknowledged. Similarly, the session event `REJECTED_MESSAGE_ERROR` is emitted in case of an error.
-This allows applications to attach a correlation object on message send and this correlation object is then passed to the event listeners implemented for above events. This allows applications to easily pass the application context to the acknowledgement, handling enabling proper correlation of messages sent and acknowledgements received.
+This allows applications to attach a correlation object on message send and this correlation object is then passed to the event listeners implemented for above events. This allows applications to easily pass the application context to the acknowledgement, enabling proper correlation of messages sent and acknowledgements received.
 
 For the purposes of this tutorial, we will track message context using the following simple object. It will keep track of the application assigned message sequence number.
 
@@ -58,6 +58,7 @@ In order to send or receive messages to a Solace message router, you need to kno
 <td>String of the form <code>protocol://DNS name:Port</code> or <code>protocol://IP:Port</code></td>
 <td>This is the address clients use when connecting to the Solace message router to send and receive messages. If Port is not provided the default port for the protocol will be used. For a Solace VMR there is only a single interface so the IP is the same as the management IP address.
 For Solace message router appliances this is the host address of the message-backbone.
+Available protocols are <code>ws://</code>, <code>wss://</code>, <code>http://</code> and <code>https://</code>
 </td>
 </tr>
 <tr>
@@ -91,7 +92,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install solclientjs
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -116,6 +117,7 @@ The structure of the code is similar to the Persistence with Queues tutorial's Q
 
 The following sections from the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial are applicable here, refer to them for all the detailed descriptions.
     
+* Pre-requisite: Creating a Durable Queue on the Solace message router
 * Loading and Initializing Solace Node.js API
 * Connecting to the Solace message router
 * Session Events
@@ -240,10 +242,10 @@ cd {{ site.baseurl | remove: '/'}}
 
 ### Installing the Node.js API
 
-For a local installation of the API package, run from the current repository root directory:
+For a local installation of the API package, run from the current `{{ site.baseurl | remove: '/'}}` directory:
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install solclientjs
 ```
 
 ### Running the Samples

@@ -41,6 +41,7 @@ In order to send or receive messages to a Solace message router, you need to kno
 <td>String of the form <code>protocol://DNS name:Port</code> or <code>protocol://IP:Port</code></td>
 <td>This is the address clients use when connecting to the Solace message router to send and receive messages. If Port is not provided the default port for the protocol will be used. For a Solace VMR there is only a single interface so the IP is the same as the management IP address.
 For Solace message router appliances this is the host address of the message-backbone.
+Available protocols are <code>ws://</code>, <code>wss://</code>, <code>http://</code> and <code>https://</code>
 </td>
 </tr>
 <tr>
@@ -74,7 +75,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install solclientjs
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -210,6 +211,9 @@ subscriber.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEve
         subscriber.session = null;
     }
 });
+subscriber.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, function (sessionEvent) {
+    subscriber.log('Cannot subscribe to topic: ' + sessionEvent.correlationKey);
+});
 subscriber.session.on(solace.SessionEventCode.SUBSCRIPTION_OK, function (sessionEvent) {
     if (subscriber.subscribed) {
         subscriber.subscribed = false;
@@ -329,16 +333,16 @@ The full source code for this example is available in [GitHub]({{ site.repositor
 Clone the GitHub repository containing the Solace samples.
 
 ```
-git clone https://github.com/SolaceSamples/solace-samples-nodejs
+git clone {{ site.repository }}
 cd {{ site.baseurl | remove: '/'}}
 ```
 
 ### Installing the Node.js API
 
-For a local installation of the API package, run from the current repository root directory:
+For a local installation of the API package, run from the current `{{ site.baseurl | remove: '/'}}` directory:
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install solclientjs
 ```
 
 ### Running the Samples

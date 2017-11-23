@@ -43,6 +43,7 @@ In order to send or receive messages to a Solace message router, you need to kno
 <td>String of the form <code>protocol://DNS name:Port</code> or <code>protocol://IP:Port</code></td>
 <td>This is the address clients use when connecting to the Solace message router to send and receive messages. If Port is not provided the default port for the protocol will be used. For a Solace VMR there is only a single interface so the IP is the same as the management IP address.
 For Solace message router appliances this is the host address of the message-backbone.
+Available protocols are <code>ws://</code>, <code>wss://</code>, <code>http://</code> and <code>https://</code>
 </td>
 </tr>
 <tr>
@@ -76,7 +77,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install solclientjs
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -93,9 +94,9 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Creating a Durable Queue on the Solace message router
+## Pre-requisite: Creating a Durable Queue on the Solace message router
 
-A difference to the publish/subscribe tutorial is that here a physical endpoint resource – a durable queue, associated with the queue destination – needs to be created on the Solace message router, which will persist the messages until consumed.
+A difference to the publish/subscribe tutorial is that for guaranteed messaging a physical endpoint resource – a durable queue, associated with the queue destination – needs to be created on the Solace message router, which will persist the messages until consumed.
 
 You can use SolAdmin or SEMP to create a durable queue. This tutorial assumes that the queue named `tutorial/queue` has been created.
 
@@ -139,7 +140,7 @@ The `solace.SolclientFactory` is used to create a Solace `Session` from `Session
 
 The following is an example of session creating and connecting to the Solace message router for the producer.
 
-Compared to the publish/subscribe tutorial, it is also not required to specify a message event listener for the `Session` object. Guaranteed messages are delivered to event listeners defined for the `MessageConsumer` object instead.
+Compared to the publish/subscribe tutorial, here it is not required to specify a message event listener for the `Session` object. Guaranteed messages are delivered to event listeners defined for the `MessageConsumer` object instead.
 
 ```javascript
 // create session
@@ -313,10 +314,10 @@ cd {{ site.baseurl | remove: '/'}}
 
 ### Installing the Node.js API
 
-For a local installation of the API package, run from the current repository root directory:
+For a local installation of the API package, run from the current `{{ site.baseurl | remove: '/'}}` directory:
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install solclientjs
 ```
 
 ### Running the Samples

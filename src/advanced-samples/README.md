@@ -2,7 +2,7 @@
 
 This directory contains code showing how to make use of advanced features of the Solace message-router.
 
-To learn more about the features, refer to the [Solace developer guide]( https://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm)
+To learn more about the features and details, refer to the [Solace developer guide]( https://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm)
 
 The code requires Node.js API version 10 or later.
 
@@ -32,6 +32,6 @@ The code requires Node.js API version 10 or later.
            * client1-rsa-1.key - client private key
        
        On the message router:
-           * server trusted root is configured
-           * server-certificate is configured
+           * server trusted root is configured - root certificate of the Certificate Authority which signed the client certificate
+           * server certificate including private key is configured
            

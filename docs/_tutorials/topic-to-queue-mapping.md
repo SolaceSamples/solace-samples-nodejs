@@ -19,9 +19,11 @@ If you have a durable queue named “Q”, it will receive messages published di
 
 ## Topic to Queue Mapping and Node.js
 
-The Solace Node.js API does not provide a way for applications to directly take advantage of the Solace Topic to Queue Mapping feature. However Node.js applications wishing to take advantage of this Solace feature have a few options.
+The Solace Node.js API does not provide a way for applications to directly take advantage of the Solace Topic to Queue Mapping feature.
 
-One option is to use a management interface to administratively configure the topic to queue mapping, by adding topic subscriptions to the queue. This can either be done through the CLI or SolAdmin management applications; or the SEMP programmatic management API. The SEMP API enables applications to fully configure Solace message routers. Applications can use this API by logging into the Solace message router using a Message-VPN admin account. This concept is introduced in the [Technology – Messaging Platform Features]({{ site.links-tech-other }}){:target="_top"} and further details are available in the [Solace Message Router Product Documentation]({{ site.docs-semp }}){:target="_top"}.
+However Node.js applications wishing to take advantage of this Solace feature can use a management interface to administratively configure the topic to queue mapping, by adding topic subscriptions to the queue. This can either be done through the CLI or SolAdmin management applications; or the SEMP programmatic management API. The SEMP API enables applications to fully configure Solace message routers. Applications can use this API by logging into the Solace message router using a Message-VPN admin account. This concept is introduced in the [Technology – Messaging Platform Features]({{ site.links-tech-other }}){:target="_top"} and further details are available in the [Solace Message Router Product Documentation]({{ site.docs-semp }}){:target="_top"}.
+
+Once having Topic to Queue Mapping configured, the `QueueConsumer` sample from the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial can be used to consume messages.
 
 ## Summary
 
