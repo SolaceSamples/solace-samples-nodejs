@@ -154,6 +154,10 @@ var NoLocalPubSub = function (solaceModule, topicName) {
             };
             sample.sessionsUp++;
         });
+        session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            sample.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         if (subscribeDirectTopicFlag) {
             // define message event listener
             session.on(solace.SessionEventCode.MESSAGE, function (message) {

@@ -117,7 +117,7 @@ The structure of the code is similar to the Persistence with Queues tutorial's Q
 
 The following sections from the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial are applicable here, refer to them for all the detailed descriptions.
     
-* Pre-requisite: Creating a Durable Queue on the Solace message router
+* Prerequisite: Creating a Durable Queue on the Solace message router
 * Loading and Initializing Solace Node.js API
 * Connecting to the Solace message router
 * Session Events

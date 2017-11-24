@@ -41,7 +41,7 @@ var BasicReplier = function (solaceModule, topicName) {
         console.log(timestamp + line);
     };
 
-    replier.log('\n*** replier to topic "' + replier.topicName + '" is ready to connect ***');
+    replier.log('*** replier to topic "' + replier.topicName + '" is ready to connect ***');
 
     // main function
     replier.run = function (argv) {
@@ -85,6 +85,10 @@ var BasicReplier = function (solaceModule, topicName) {
         replier.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             replier.log('=== Successfully connected and ready to subscribe to request topic. ===');
             replier.subscribe();
+        });
+        replier.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            replier.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
         });
         replier.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             replier.log('Disconnected.');
@@ -161,8 +165,6 @@ var BasicReplier = function (solaceModule, topicName) {
                 } catch (error) {
                     replier.log(error.toString());
                 }
-            } else {
-                replier.log('Cannot unsubscribe because not subscribed to the topic "' + replier.topicName + '"');
             }
         } else {
             replier.log('Cannot unsubscribe because not connected to Solace message router.');
@@ -190,8 +192,6 @@ var BasicReplier = function (solaceModule, topicName) {
         if (replier.session !== null) {
             try {
                 replier.session.disconnect();
-                replier.session.dispose();
-                replier.session = null;
             } catch (error) {
                 replier.log(error.toString());
             }

@@ -87,6 +87,10 @@ var QueueConsumer = function (solaceModule, queueName) {
             consumer.log('=== Successfully connected and ready to start the message consumer. ===');
             consumer.startConsume();
         });
+        consumer.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            consumer.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         consumer.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             consumer.log('Disconnected.');
             consumer.consuming = false;

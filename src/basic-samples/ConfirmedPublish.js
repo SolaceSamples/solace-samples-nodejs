@@ -91,6 +91,10 @@ var QueueProducer = function (solaceModule, queueName) {
             producer.log('=== Successfully connected and ready to send messages. ===');
             producer.sendMessages();
         });
+        producer.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            producer.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         producer.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, function (sessionEvent) {
             producer.log('Delivery of message with correlation key = ' +
                 JSON.stringify(sessionEvent.correlationKey) + ' confirmed.');

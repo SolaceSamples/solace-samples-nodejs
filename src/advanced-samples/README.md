@@ -2,17 +2,19 @@
 
 This directory contains code showing how to make use of advanced features of the Solace message router.
 
+The code requires Node.js API version 10 or later.
+
 To learn more about the features and details, refer to the [Solace developer guide]( https://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm)
 
-The code requires Node.js API version 10 or later.
+For an introduction to the Node.js API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
 
 * ActiveFlowIndication: This sample will show how multiple flows can bind to an exclusive queue, but only one client at a time can actively receive messages. If the Active Flow Indication Flow property is enabled, a Flow active/inactive event is returned to the client when its bound flow becomes/stops being the active flow. Start this app, then the `basic-samples/ConfirmedPublish` app can be used to send 10 messages to trigger it.
 
-    Prerequisite: this sample requires that the queue "tutorial/queue" exists on the message router and configured to be "exclusive". 
+    Prerequisite: this sample requires that the queue "tutorial/queue" exists on the message router and configured to be "exclusive".  Ensure the queue is enabled for both Incoming and Outgoing messages and set the Permission to at least 'Consume'.
 
 * DTEConsumer: This sample shows how to consume messages from a Durable Topic Endpoint (DTE). The sample will associate the DTE with the topic "tutorial/topic", so the `basic-samples/TopicPublisher` app can be used to send messages to this topic.
 
-    Prerequisite: the DTE with the name "tutorial/dte" must have been provisioned on the message router vpn. 
+    Prerequisite: the DTE with the name "tutorial/dte" must have been provisioned on the message router vpn.  Ensure the DTE is enabled for both Incoming and Outgoing messages and set the Permission to at least 'Consume'.
 
 * EventMonitor: This sample demonstrates how to use the special event monitoring topic subscriptions to build an application that monitors message router generated events. Start this sample then run any other sample app and observe a client connect event reported for that sample.
 

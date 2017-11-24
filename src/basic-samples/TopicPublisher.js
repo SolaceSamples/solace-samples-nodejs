@@ -87,6 +87,10 @@ var TopicPublisher = function (solaceModule, topicName) {
             publisher.publish();
             publisher.exit();
         });
+        publisher.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            publisher.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         publisher.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             publisher.log('Disconnected.');
             if (publisher.session !== null) {

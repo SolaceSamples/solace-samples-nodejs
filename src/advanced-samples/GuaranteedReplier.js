@@ -87,6 +87,10 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
             replier.log('=== Successfully connected and ready to consume messages sent to request topic ===');
             replier.startService();
         });
+        replier.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            replier.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         replier.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             replier.log('Disconnected.');
             replier.active = false;

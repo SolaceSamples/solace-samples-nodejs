@@ -87,6 +87,10 @@ var QueueProducer = function (solaceModule, queueName) {
             producer.sendMessage();
             producer.exit();
         });
+        producer.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            producer.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         producer.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             producer.log('Disconnected.');
             if (producer.session !== null) {

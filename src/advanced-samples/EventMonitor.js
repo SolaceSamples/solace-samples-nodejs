@@ -88,6 +88,10 @@ var EventSubscriber = function (solaceModule) {
             subscriber.log('=== Successfully connected and ready to subscribe. ===');
             subscriber.subscribe();
         });
+        subscriber.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+            subscriber.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+                ' - check correct parameter values and connectivity!');
+        });
         subscriber.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
             subscriber.log('Disconnected.');
             subscriber.subscribed = false;
