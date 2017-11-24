@@ -248,7 +248,7 @@ For a local installation of the API package, run from the current `{{ site.baseu
 npm install solclientjs
 ```
 
-### Running the Samples
+### Running the Sample
 
 The sample application is in the `/src/basic-samples` directory: `ConfirmedPublish.js`. 
 

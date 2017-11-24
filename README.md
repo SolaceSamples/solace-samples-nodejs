@@ -39,7 +39,7 @@ git clone https://github.com/SolaceSamples/solace-samples-nodejs
 cd solace-samples-nodejs
 ```
  
-### Download the Solace JavaScript API
+### Download the Solace Node.js API
 
 These samples depend on version 10 or later of the Solace Node.js API library.
 
@@ -69,7 +69,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-See the list of [contributors](https://github.com/SolaceSamples/solace-samples-template/contributors) who participated in this project.
+See the list of [contributors](https://github.com/SolaceSamples/solace-samples-nodejs/contributors) who participated in this project.
 
 ## License
 

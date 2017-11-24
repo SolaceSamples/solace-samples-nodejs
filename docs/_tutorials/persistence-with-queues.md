@@ -18,8 +18,6 @@ This tutorial assumes the following:
 
 One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
 
-The build instructions in this tutorial assume you are using a Linux shell. If your environment differs, adapt the instructions.
-
 ## Goals
 
 The goal of this tutorial is to understand the following:
@@ -94,7 +92,7 @@ This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} 
 
 At the end, this tutorial walks through downloading and running the sample from source.
 
-## Pre-requisite: Creating a Durable Queue on the Solace message router
+## Prerequisite: Creating a Durable Queue on the Solace message router
 
 A difference to the publish/subscribe tutorial is that for guaranteed messaging a physical endpoint resource – a durable queue, associated with the queue destination – needs to be created on the Solace message router, which will persist the messages until consumed.
 
