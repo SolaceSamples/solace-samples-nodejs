@@ -3,6 +3,11 @@ layout: tutorials
 title: Publish/Subscribe
 summary: Learn how to set up pub/sub messaging on a Solace VMR.
 icon: I_dev_P+S.svg
+links:
+    - label: TopicPublisher.js
+      link: /blob/master/src/basic-samples/TopicPublisher.js
+    - label: TopicSubscriber.js
+      link: /blob/master/src/basic-samples/TopicSubscriber.js
 ---
 
 This tutorial will introduce you to the fundamentals of the Solace Node.js API version 10 or later by connecting a client, adding a topic subscription and sending a message matching this topic subscription. This forms the basis for any publish / subscribe message exchange.

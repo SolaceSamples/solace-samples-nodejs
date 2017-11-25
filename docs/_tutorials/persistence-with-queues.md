@@ -3,6 +3,11 @@ layout: tutorials
 title: Persistence with Queues
 summary: Learn how to set up persistence for guaranteed delivery.
 icon: I_dev_Persistent.svg
+links:
+    - label: QueueProducer.js
+      link: /blob/master/src/basic-samples/QueueProducer.js
+    - label: QueueConsumer.js
+      link: /blob/master/src/basic-samples/QueueConsumer.js
 ---
 
 This tutorial builds on the basic concepts introduced in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe), and will show you how to send and receive Persistent (Guaranteed) Messages from a Solace message router queue in a point to point fashion.

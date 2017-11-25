@@ -3,6 +3,9 @@ layout: tutorials
 title: Confirmed Delivery
 summary: Learn how to confirm that your messages are received by a Solace message router.
 icon: I_dev_confirm.svg
+links:
+    - label: ConfirmedPublish.js
+      link: /blob/master/src/basic-samples/ConfirmedPublish.js
 ---
 
 This tutorial builds on the basic concepts introduced in [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial and will show you how to properly process publisher acknowledgements. Once an acknowledgement for a message has been received and processed, you have confirmed your persistent messages have been properly accepted by the Solace message router and therefore can be guaranteed of no message loss.
