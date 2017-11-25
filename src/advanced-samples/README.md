@@ -4,7 +4,7 @@ This directory contains code showing how to make use of advanced features of the
 
 The code requires Node.js API version 10 or later.
 
-To learn more about the features and details, refer to the [Solace developer guide]( https://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm)
+To learn more about specific features and details, refer to the [Solace developer guide]( https://docs.solace.com/Solace-Messaging-APIs/Developer-Guide/Developer-Guide-Home.htm)
 
 For an introduction to the Node.js API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
 

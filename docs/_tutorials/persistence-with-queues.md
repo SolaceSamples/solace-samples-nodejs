@@ -75,7 +75,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -94,7 +94,7 @@ At the end, this tutorial walks through downloading and running the sample from 
 
 ## Prerequisite: Creating a Durable Queue on the Solace message router
 
-A difference to the publish/subscribe tutorial is that for guaranteed messaging a physical endpoint resource – a durable queue, associated with the queue destination – needs to be created on the Solace message router, which will persist the messages until consumed.
+A difference with the publish/subscribe tutorial is that for guaranteed messaging a physical endpoint resource – a durable queue, associated with the queue destination – needs to be created on the Solace message router, which will persist the messages until consumed.
 
 You can use SolAdmin or SEMP to create a durable queue. This tutorial assumes that the queue named `tutorial/queue` has been created.  Ensure the queue is enabled for both Incoming and Outgoing messages and set the Permission to at least 'Consume'.
 
@@ -132,11 +132,11 @@ For guaranteed messaging, we will use a "producer" to send messages to and a "co
 
 ### Connecting to the Solace message router
 
-Similarly to the publish/subscribe tutorial, an application must connect a Solace session. The Solace session is the basis for all client communication with the Solace message router.
+Similar to the publish/subscribe tutorial, an application must connect a Solace session. The Solace session is the basis for all client communication with the Solace message router.
 
 The `solace.SolclientFactory` is used to create a Solace `Session` from `SessionProperties`.
 
-The following is an example of session creating and connecting to the Solace message router for the producer.
+The following is an example of a session creating and connecting to the Solace message router for the producer.
 
 Compared to the publish/subscribe tutorial, here it is not required to specify a message event listener for the `Session` object. Guaranteed messages are delivered to event listeners defined for the `MessageConsumer` object instead.
 
@@ -168,9 +168,10 @@ The Solace Node.js API communicates changes in status and results of connect cal
 It is necessary to wire your application logic to session events through listeners to take appropriate action. The most important session events are:
 
 *   `SessionEventCode.UP_NOTICE`: session has been successfully connected to the Solace message router
+*   `SessionEventCode.CONNECT_FAILED_ERROR`: unable to connect to the Solace message router
 *   `SessionEventCode.DISCONNECTED`: session has been disconnected from the Solace message router
 
-This is how event listeners can be defined in the sample producer and the sample consumer is very similar:
+This is how event listeners can be defined in the sample producer, and the sample consumer is very similar:
 
 ```javascript
 // define session event listeners
@@ -178,6 +179,10 @@ producer.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
     producer.log('=== Successfully connected and ready to send messages. ===');
     producer.sendMessage();
     producer.exit();
+});
+producer.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+    producer.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+        ' - check correct parameter values and connectivity!');
 });
 producer.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
     producer.log('Disconnected.');
@@ -194,11 +199,11 @@ Note that the application logic can be triggered only after receiving the `solac
 
 ### Sending a message to a queue
 
-Now it is time to send a message to the queue.  Remember that the queue must be pre-configured on the message-router as described in the "Creating a Durable Queue" section.
+Now it is time to send a message to the queue. Remember that the queue must be pre-configured on the message router as described in the "Creating a Durable Queue" section.
 
 ![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
 
-The actual method calls to create and send guaranteed messages to a queue is like for direct messages in the publish/subscribe tutorial. The differences are that:
+The actual method calls to create and send guaranteed messages to a queue are similar to those used for direct messages in the publish/subscribe tutorial. The differences are:
 * a durable queue type destination is created and used; and
 * the delivery mode is set to PERSISTENT.
 
@@ -227,7 +232,7 @@ Now it is time to receive the messages sent to your queue.
 
 Receiving guaranteed messages is different from the direct messaging case described in the the publish/subscribe tutorial.
 
-To receive guaranteed messages, a connected `Session` is used to create a Solace `MessageConsumer` object from `MessageConsumerProperties` and then connected, meaning that it will bind to the queue on the message-router and can start receiving messages.
+To receive guaranteed messages, a connected `Session` is used to create a Solace `MessageConsumer` object from `MessageConsumerProperties` and then connected, meaning that it will bind to the queue on the message router and can start receiving messages.
 
 ```javascript
 // Create message consumer

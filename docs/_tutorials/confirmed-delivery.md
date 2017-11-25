@@ -28,7 +28,7 @@ The goal of this tutorial is to understand the following:
 
 ## Overview
 
-In order to send guaranteed messages to a Solace message router with no chance of message loss, it is absolutely necessary to properly process the acknowledgements that come back from the Solace message router. These acknowledgements will let you know if the message was accepted by the Solace message router or if it was rejected. If it is rejected, the acknowledgement will also contain exact details of why it was rejected. For example, you may not have permission to send guaranteed messages or queue destination may not exist etc.
+In order to send guaranteed messages to a Solace message router with no chance of message loss, it is absolutely necessary to properly process the acknowledgements that come back from the Solace message router. These acknowledgements will let you know if the message was accepted by the Solace message router or if it was rejected. If was rejected, the acknowledgement will also contain exact details of why. For example, you may not have permission to send guaranteed messages or the queue destination may not exist etc.
 
 In order to properly handle message acknowledgements it is also important to know which message is being acknowledged. In other words, applications often need some application context along with the acknowledgement from the Solace message router to properly process the business logic on their end. The Solace Node.js API enables this through emitting a session event called `ACKNOWLEDGED_MESSAGE` when a message is successfully acknowledged. Similarly, the session event `REJECTED_MESSAGE_ERROR` is emitted in case of an error.
 This allows applications to attach a correlation object on message send and this correlation object is then passed to the event listeners implemented for above events. This allows applications to easily pass the application context to the acknowledgement, enabling proper correlation of messages sent and acknowledgements received.
@@ -113,7 +113,7 @@ At the end, this tutorial walks through downloading and running the sample from 
 
 This tutorial’s sample application will send guaranteed messages to a durable queue pre-configured on the Solace message router. You can use SolAdmin or SEMP to create a durable queue. This tutorial assumes that the queue named `tutorial/queue` has been created.
 
-The structure of the code is similar to the Persistence with Queues tutorial's Queue Producer with the additions of several messages being sent and the acknowledgements logged that come back from the Solace message router for each message.
+The structure of the code is similar to the Persistence with Queues tutorial's Queue Producer with the additions of several messages being sent and the acknowledgements logged for each message that comes back from the Solace message router.
 
 The following sections from the [Persistence with Queues]({{ site.baseurl }}/persistence-with-queues) tutorial are applicable here, refer to them for all the detailed descriptions.
     
@@ -125,7 +125,7 @@ The following sections from the [Persistence with Queues]({{ site.baseurl }}/per
 
 ### Configuring Per-Message publisher acknowledge event mode
 
-To confirm successful delivery of each published guaranteed message to the message-router, set "Per-Message" publisher acknowledgement so the application receives an acknowledgement event for every message. To learn more about publisher acknowledge event modes refer to the [Customer Documentation - Acknowledging Published Messages]({{ site.docs-ack-pub-msgs }}){:target="_top"}.
+To confirm successful delivery of each published guaranteed message to the message router, set "Per-Message" publisher acknowledgement so the application receives an acknowledgement event for every message. To learn more about publisher acknowledge event modes refer to the [Customer Documentation - Acknowledging Published Messages]({{ site.docs-ack-pub-msgs }}){:target="_top"}.
 
 Because the guaranteed message publisher is embedded in the `Session` object, configure the `publisherProperties` property of the `SessionProperties` which is used when creating the session. Specifically, set the `acknowledgeMode` of the `publisherProperties`:
 
@@ -252,7 +252,7 @@ npm install solclientjs
 
 The sample application is in the `/src/basic-samples` directory: `ConfirmedPublish.js`. 
 
-It will send 10 messages, waits for the delivery confirmation for all messages then exits. The `QueueConsumer` sample application from the Persistence with Queues tutorial can be used to receive and display the sent messages.
+It will send 10 messages, wait for the delivery confirmation for all messages then exit. The `QueueConsumer` sample application from the Persistence with Queues tutorial can be used to receive and display the sent messages.
 
 **Sample Output**
 

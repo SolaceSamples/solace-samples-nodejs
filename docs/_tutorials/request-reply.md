@@ -22,7 +22,7 @@ The build instructions in this tutorial assume you are using a Linux shell. If y
 
 ## Goals
 
-The goal of this tutorial is to understand the following:
+The goals of this tutorial are to understand the following:
 
 *   On the requestor side:
     1.  How to create a request
@@ -113,7 +113,7 @@ At the end, this tutorial walks through downloading and running the sample from 
 
 ## Implementing Request/Reply
 
-This tutorial’s sample code comes as two separated applications: one (with the “requestor” object) send requests to a specific topic and the other (with the “replier” object) subscribes to requests on that topic, receives the requests and replies on them.
+This tutorial’s sample code comes as two separate applications: one (with the “requestor” object) send requests to a specific topic and the other (with the “replier” object) subscribes to requests on that topic, receives the requests and replies on them.
 
 The structure of the requestor application is similar to the publish/subscribe tutorial's topic publisher. Here instead of simply publishing a message, a request will be sent.
 
@@ -142,7 +142,7 @@ request.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, reque
 request.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
 ```
 
-Now the request can be sent. Notice callbacks `replyReceivedCb` and `requestFailedCb`. These are functions that will be called when a reply message is received (`replyReceivedCb`) or sending of the request is failed (`requestFailedCb`).
+Now the request can be sent. Notice callbacks `replyReceivedCb` and `requestFailedCb`. These are functions that will be called when a reply message is received (`replyReceivedCb`) or sending the request fails (`requestFailedCb`).
 
 ```javascript
 try {
@@ -168,7 +168,7 @@ Now it is time to receive the request and generate an appropriate reply.
 
 ![]({{ site.baseurl }}/images/Request-Reply_diagram-3.png)
 
-Just as with previous tutorials, you still need to connect a session and subscribe to the topics that requests are sent on (the request topic). The following is an example of such reply.
+Just as with previous tutorials, you still need to connect a session and subscribe to the topics that requests are sent on (the request topic). The following is an example of such a reply.
 
 ```javascript
 replier.reply = function (message) {
@@ -200,13 +200,12 @@ replier.session.on(solace.SessionEventCode.MESSAGE, function (message) {
 
 ### Receiving the Reply Message
 
-All that’s left is to receive and process the reply message as it is received at the requestor or report a failure to send the request:
+All that’s left is to receive and process the reply message as it is received at the requestor or report a failure:
 
 ```javascript
 requestor.replyReceivedCb = function (session, message) {
 	requestor.log('Received reply: "' + message.getSdtContainer().getValue() + '"');
 };
-
 requestor.requestFailedCb = function (session, event) {
 	requestor.log('Request failure: ' + event.toString());
 };
@@ -314,7 +313,7 @@ Binary Attachment:                      len=17
 [14:52:16] Replied.
 ```
 
-With that you now know how to successfully implement request-reply message exchange pattern using Direct messages.
+With that you now know how to successfully implement the request-reply message exchange pattern using Direct messages.
 
 If you have any issues sending and replying a message, check the [Solace community Q&A]({{ site.links-community }}){:target="_top"} for answers to common issues seen.
 

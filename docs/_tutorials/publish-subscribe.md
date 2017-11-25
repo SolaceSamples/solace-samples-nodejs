@@ -16,11 +16,11 @@ This tutorial assumes the following:
     *   Enabled message VPN
     *   Enabled client username
 
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the “default” message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
+One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will run with the `default` message VPN configured and ready for messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration, adapt the instructions to match your configuration.
 
 ## Goals
 
-The goal of this tutorial is to demonstrate the most basic messaging interaction using Solace. This tutorial will show you:
+The goal of this tutorial is to demonstrate the most basic messaging interaction using a Solace message router. This tutorial will show you:
 
 1.  How to build and send a message on a topic
 2.  How to subscribe to a topic and receive a message
@@ -66,7 +66,7 @@ This information will be passed as arguments to the sample scripts as described 
 
 ## Obtaining the Solace API
 
-This tutorial depends on you having the Solace Node.js API version 10 or later downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Building section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the build instructions appropriately.
+This tutorial depends on you having Solace Node.js API version 10 or later downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Running the Samples section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the instructions appropriately.
 
 The API Reference is available online at the [Node.js API documentation]({{ site.docs-api-reference }}){:target="_top"}.
 
@@ -75,7 +75,7 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 This will locate and download the packages from the `npmjs` public repository.
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -124,15 +124,15 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 In order to send or receive messages, an application must connect a Solace session. The Solace session is the basis for all client communication with the Solace message router.
 
-The `solace.SolclientFactory` is used to create a Solace `Session` from `SessionProperties`. In the example below the `SessionProperties` is created using object initializers.
+The `solace.SolclientFactory` is used to create a Solace `Session` from `SessionProperties`. In the example below, `SessionProperties` is created using object initializers.
 
 Then listeners are defined for Session Events of interest and for receiving direct messages, which are explained in the next sections. 
 
 The created session connects to the Solace message router with the `session.connect()` call.
 
-This tutorial’s sample code comes as two separated applications: one (with the “publisher” object) publishes messages to a specific topic and the other (with the “subscriber” object) subscribes to messages on that topic, and receives the messages.
+This tutorial’s sample code comes as two separate applications: one (with the "publisher" object) publishes messages to a specific topic, and the other (with the "subscriber" object) subscribes to messages on that topic and receives the messages.
 
-The following is an example of session creating and connecting to the Solace message router for the subscriber. The publisher's code will be the same except for that it doesn't require a message event listener.
+The following is an example of a session creating and connecting to the Solace message router for the subscriber. The publisher's code will be the same except for that it doesn't require a message event listener.
 
 ```javascript
 // create session
@@ -164,6 +164,7 @@ The Solace Node.js API communicates changes in status and results of connect and
 It is necessary to wire your application logic to events through listeners to take appropriate action. The most important events are:
 
 *   `SessionEventCode.UP_NOTICE`: success connecting session to the Solace message router
+*   `SessionEventCode.CONNECT_FAILED_ERROR`: unable to connect to the Solace message router
 *   `SessionEventCode.DISCONNECTED`: session was disconnected from the Solace message router
 *   `SessionEventCode.SUBSCRIPTION_OK`: subscription to a topic was successfully created on the Solace message router
 
@@ -175,6 +176,10 @@ publisher.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) 
     publisher.log('=== Successfully connected and ready to publish messages. ===');
     publisher.publish();
     publisher.exit();
+});
+publisher.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
+    publisher.log('Connection failed to the message router: ' + sessionEvent.infoStr +
+        ' - check correct parameter values and connectivity!');
 });
 publisher.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
     publisher.log('Disconnected.');
@@ -199,18 +204,7 @@ On the subscriber side we also might want to implement reaction to subscription 
 
 ```javascript
 // define session event listeners
-subscriber.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
-    subscriber.log('=== Successfully connected and ready to subscribe. ===');
-    subscriber.subscribe();
-});
-subscriber.session.on(solace.SessionEventCode.DISCONNECTED, function (sessionEvent) {
-    subscriber.log('Disconnected.');
-    subscriber.subscribed = false;
-    if (subscriber.session !== null) {
-        subscriber.session.dispose();
-        subscriber.session = null;
-    }
-});
+/*...SNIP...*/
 subscriber.session.on(solace.SessionEventCode.SUBSCRIPTION_ERROR, function (sessionEvent) {
     subscriber.log('Cannot subscribe to topic: ' + sessionEvent.correlationKey);
 });
@@ -280,9 +274,9 @@ subscriber.subscribe = function () {
 Notice parameters to the session `subscribe` function.
 
 *   __The first parameter__ is the subscription topic.
-*   __The second (boolean) parameter__ specifies whether a corresponding events will be generated when the subscription is added successfully.
+*   __The second (boolean) parameter__ specifies whether a corresponding event will be generated when the subscription is added successfully.
 *   __The third parameter__ is the correlation key. This parameters value will be returned to the `SUBSCRIPTION_OK` session event listener for as the `correlationKey` property of the event: `event.correlationKey`.
-*   __The last, fourth parameter__ is the function call timeout. The timeout sets the limit in milliseconds the `subscribe` function is allowed to block the execution thread. If this limit is reached and the subscription is still not added, then an exception is thrown.
+*   __The fourth parameter__ is the function call timeout. The timeout sets the limit in milliseconds the `subscribe` function is allowed to block the execution thread. If this limit is reached and the subscription is still not added, then an exception is thrown.
 
 After the subscription is successfully added the subscriber is ready to receive messages and nothing happens until a message is received.
 
@@ -342,7 +336,7 @@ cd {{ site.baseurl | remove: '/'}}
 For a local installation of the API package, run from the current `{{ site.baseurl | remove: '/'}}` directory:
 
 ```
-npm install solclientjs
+npm install solclientjs@">=10.0.0"
 ```
 
 ### Running the Samples
