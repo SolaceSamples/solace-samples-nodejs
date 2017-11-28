@@ -96,10 +96,10 @@ The API Reference is available online at the [Node.js API documentation]({{ site
 
 ### Get the API: Using the npmjs repository
 
-This will locate and download the packages from the `npmjs` public repository.
+This will locate and download compatible library packages from the `npmjs` public repository using the local `package.json` specs.
 
 ```
-npm install solclientjs
+npm install
 ```
 
 ### Get the API: Using the Solace Developer Portal
@@ -231,13 +231,15 @@ Clone the GitHub repository containing the Solace samples.
 git clone {{ site.repository }}
 cd {{ site.baseurl | remove: '/'}}
 ```
+ 
+Note: the code in the `master` branch of this repository depends on Solace Node.js API version 10 or later. If you want to work with an older version clone the branch that corresponds your version.
 
 ### Installing the Node.js API
 
 For a local installation of the API package, run from the current `{{ site.baseurl | remove: '/'}}` directory:
 
 ```
-npm install solclientjs
+npm install
 ```
 
 ### Running the Samples

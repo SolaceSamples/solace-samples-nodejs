@@ -23,12 +23,12 @@ This repository contains:
 
 * Additional sample code, showing how to make use of **advanced** features of the Solace message-router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples).
 
+    - [Secure Session](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to use secure connection to the server, and server and client certificate authentication.
     - [Active Flow Indication](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how multiple flows can bind to an exclusive queue, but only one client at a time can actively receive messages.
     - [Durable Topic Endpoint Consumer](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to consume messages from a Durable Topic Endpoint (DTE).
     - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to monitor message-router generated events.
     - [GuaranteedRequestor/Replier](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to set up guaranteed request/reply messaging.
     - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to prevent messages published on a session or flow received on that same session or flow.
-    - [Secure Session](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to use secure connection to the server and server and client certificate authentication.
 
 ## Checking out
 
@@ -39,16 +39,18 @@ git clone https://github.com/SolaceSamples/solace-samples-nodejs
 cd solace-samples-nodejs
 ```
  
+Note: the code in the `master` branch of this repository depends on Solace Node.js API version 10 or later. If you want to work with an older version clone the branch that corresponds your version.
+    
 ### Download the Solace Node.js API
 
 These samples depend on version 10 or later of the Solace Node.js API library.
 
-The library can be installed from the `npmjs` central repository.
+The library can be installed from the `npmjs` central repository using the `package.json` specs.
 
 For a local installation of the API package, run from the current `solace-samples-nodejs` directory:
 
 ```
-npm install solclientjs@">=10.0.0"
+npm install
 ```
 
 ## Running the Samples

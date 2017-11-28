@@ -129,10 +129,11 @@ var GuaranteedRequestor = function (solaceModule, requestTopicName) {
             // process the response received at the replyToQueue
             replyMessageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function onMessage(message) {
                 if (message.getCorrelationId() === requestor.correlationID) {
-                    requestor.log('Received reply: "' + message.getBinaryAttachment() + '", details:\n' + message.dump());
+                    requestor.log('Received reply: "' + message.getBinaryAttachment() +
+                        '", details:\n' + message.dump());
                 } else {
-                    requestor.log(`Received reply but correlation ID didn't match: "` + message.getBinaryAttachment() +
-                    '",' + ' details:\n' + message.dump());
+                    requestor.log("Received reply but correlation ID didn't match: " +
+                        '"' +  message.getBinaryAttachment() + '" details:\n' + message.dump());
                 }
                 requestor.exit();
             });

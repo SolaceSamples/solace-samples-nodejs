@@ -51,7 +51,7 @@ var BasicReplier = function (solaceModule, topicName) {
     // Establishes connection to Solace message router
     replier.connect = function (argv) {
         if (replier.session !== null) {
-            replier.log('Already connected and ready to publish.');
+            replier.log('Already connected and ready to subscribe to request topic.');
             return;
         }
         // extract params
@@ -176,7 +176,6 @@ var BasicReplier = function (solaceModule, topicName) {
         replier.log('Replying...');
         if (replier.session !== null) {
             var reply = solace.SolclientFactory.createMessage();
-            var ba = message.getBinaryAttachment();
             var replyText = message.getSdtContainer().getValue() + " - Sample Reply";
             reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, replyText));
             replier.session.sendReply(message, reply);

@@ -115,7 +115,8 @@ var QueueConsumer = function (solaceModule, queueName) {
     consumer.startConsume = function () {
         if (consumer.session !== null) {
             if (consumer.consuming) {
-                consumer.log('Already started consumer for queue "' + consumer.queueName + '" and ready to receive messages.');
+                consumer.log('Already started consumer for queue "' + consumer.queueName +
+                    '" and ready to receive messages.');
             } else {
                 consumer.log('Starting consumer for exclusive queue: ' + consumer.queueName + ' on two flows.');
                 try {

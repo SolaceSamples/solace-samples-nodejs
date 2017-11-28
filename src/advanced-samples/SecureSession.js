@@ -138,7 +138,8 @@ var SecureTopicSubscriber = function (solaceModule, topicName) {
         });
         // define message event listener
         subscriber.session.on(solace.SessionEventCode.MESSAGE, function (message) {
-            subscriber.log('Received message: "' + message.getBinaryAttachment() + '", details:\n' + message.dump());
+            subscriber.log('Received message: "' + message.getBinaryAttachment() + '", details:\n' +
+                message.dump());
         });
         // connect the session
         try {
@@ -152,7 +153,8 @@ var SecureTopicSubscriber = function (solaceModule, topicName) {
     subscriber.subscribe = function () {
         if (subscriber.session !== null) {
             if (subscriber.subscribed) {
-                subscriber.log('Already subscribed to "' + subscriber.topicName + '" and ready to receive messages.');
+                subscriber.log('Already subscribed to "' + subscriber.topicName +
+                    '" and ready to receive messages.');
             } else {
                 subscriber.log('Subscribing to topic: ' + subscriber.topicName);
                 try {
@@ -195,7 +197,8 @@ var SecureTopicSubscriber = function (solaceModule, topicName) {
                     subscriber.log(error.toString());
                 }
             } else {
-                subscriber.log('Cannot unsubscribe because not subscribed to the topic "' + subscriber.topicName + '"');
+                subscriber.log('Cannot unsubscribe because not subscribed to the topic "' +
+                    subscriber.topicName + '"');
             }
         } else {
             subscriber.log('Cannot unsubscribe because not connected to Solace message router.');
