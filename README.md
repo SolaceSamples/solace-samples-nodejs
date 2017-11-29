@@ -21,12 +21,12 @@ This repository contains:
     - [Confirmed Delivery](https://solacesamples.github.io/solace-samples-nodejs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
     - [Topic to Queue Mapping](https://solacesamples.github.io/solace-samples-nodejs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
 
-* Additional sample code, showing how to make use of **advanced** features of the Solace message-router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples).
+* Additional sample code, showing how to make use of **advanced** features of the Solace message router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples).
 
     - [Secure Session](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to use secure connection to the server, and server and client certificate authentication.
     - [Active Flow Indication](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how multiple flows can bind to an exclusive queue, but only one client at a time can actively receive messages.
     - [Durable Topic Endpoint Consumer](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to consume messages from a Durable Topic Endpoint (DTE).
-    - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to monitor message-router generated events.
+    - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to monitor message router generated events.
     - [GuaranteedRequestor/Replier](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to set up guaranteed request/reply messaging.
     - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to prevent messages published on a session or flow received on that same session or flow.
 

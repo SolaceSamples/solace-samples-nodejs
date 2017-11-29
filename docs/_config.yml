@@ -7,6 +7,7 @@ repository: https://github.com/SolaceSamples/solace-samples-nodejs
 # Also see _includes/intro.html to customize the description which gets included in index.html.
 
 # Links
+advanced-samples: https://github.com/SolaceSamples/solace-samples-nodejs/tree/EnterpriseJavaScriptUpdates/src/advanced-samples
 links-community: http://dev.solace.com/community/
 links-downloads: http://dev.solace.com/downloads/
 links-solaceCloud-setup: http://cloud.solace.com/create-messaging-service/

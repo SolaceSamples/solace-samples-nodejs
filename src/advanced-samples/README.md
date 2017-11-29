@@ -16,7 +16,7 @@ To learn more about specific features and details, refer to the [Solace develope
 
     *Prerequisites*:
     
-    Following certificates and key must be locally available in the `certs` folder under `advanced-samples`. It is assumed that you have generated the required private/public keys and certificates using ssl tools.
+    Following certificates and key must be locally available in the `certs` folder under `advanced-samples`. It is assumed that you know how TLS/SSL certificates and Certificate Authorities ("CAs") work and you have generated the required private/public keys and certificates using ssl tools.
     
     * root_ca-rsa.crt - root certificate of the Certificate Authority which signed the message router's certificate
     * client1-rsa-1.crt - client certificate

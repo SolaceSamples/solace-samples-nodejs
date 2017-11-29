@@ -12,7 +12,7 @@ This tutorial requires access Solace messaging and requires that you know severa
   <tr>
     <td>Host</td>
     <td>String</td>
-    <td>This is the address clients use when connecting to the Solace messaging to send and receive messages. (Format: <code>DNS_NAME:Port</code> or <code>IP:Port</code>)</td>
+    <td>This is the address clients use when connecting to the Solace messaging to send and receive messages (format: <code>protocol://DNS_NAME:Port</code> or <code>protocol://IP:Port</code>). The available protocols are <code>ws://</code>, <code>wss://</code>, <code>http://</code> and <code>https://</code></td>
   </tr>
   <tr>
     <td>Message VPN</td>
@@ -30,6 +30,8 @@ This tutorial requires access Solace messaging and requires that you know severa
     <td>The client password. (See Notes below)</td>
   </tr>
 </table>
+
+This information will be passed as arguments to the sample scripts as described in the "Running the Samples" section below.
 
 ### Option 1: Start a Solace VMR
 
