@@ -370,6 +370,6 @@ Binary Attachment:                      len=14
   53 61 6d 70 6c 65 20 4d    65 73 73 61 67 65          Sample.Message
 ```
 
-You have now successfully connected a client, sent guaranteed messages to a queue and received them from a consumer flow.
+You have now successfully connected a client, sent guaranteed messages to a queue and received them from a message consumer.
 
 If you have any issues sending and receiving a message, check the [Solace community]({{ site.links-community }}){:target="_top"} for answers to common issues.

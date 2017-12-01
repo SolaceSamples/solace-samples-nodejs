@@ -60,7 +60,7 @@ var TopicSubscriber = function (solaceModule, topicName) {
             subscriber.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         subscriber.log('Connecting to Solace message router using url: ' + hosturl);

@@ -22,6 +22,15 @@
  * Guaranteed Request/Reply tutorial - Guaranteed Replier
  * Demonstrates how to receive a request message and responds
  * to it by sending a guaranteed reply message.
+ *
+ * This sample will show the implementation of guaranteed Request-Reply messaging,
+ * where `GuaranteedRequestor` is a message Endpoint that sends a guaranteed request message
+ * to a request topic and waits to receive a reply message on a dedicated temporary queue as
+ * a response; `GuaranteedReplier` is a message Endpoint that waits to receive a request message
+ * on a request topic - it will create a non-durable topic endpoint for that - and responds to
+ * it by sending a guaranteed reply message.
+ * Start the replier first as the non-durable topic endpoint will only be created for the
+ * duration of the replier session and any request sent before that will not be received.
  */
 
 /*jslint es6 devel:true node:true*/
@@ -61,7 +70,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
             replier.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         replier.log('Connecting to Solace message router using url: ' + hosturl);
@@ -84,7 +93,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
         }
         // define session event listeners
         replier.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
-            replier.log('=== Successfully connected and ready to consume messages sent to request topic ===');
+            replier.log('=== Successfully connected and reply-service is starting ===');
             replier.startService();
         });
         replier.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
@@ -119,13 +128,16 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
                         topicEndpointSubscription: replier.requestTopicName,
                         queueDescriptor: { type: solace.QueueType.TOPIC_ENDPOINT, durable: false }
                     });
-                    replier.messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function onMessage(message) {
+                    replier.messageConsumer.on(solace.MessageConsumerEventName.UP, function () {
+                        replier.active = true;
+                        replier.log('Replier is consuming from temporary topic endpoint,' +
+                            ' which is attracting messages to "' + replier.requestTopicName + '"');
+                    });
+                    replier.messageConsumer.on(solace.MessageConsumerEventName.MESSAGE,
+                                               function onMessage(message) {
                         replier.reply(message);
                     });
                     replier.messageConsumer.connect();
-                    replier.active = true;
-                    replier.log('Replier is consuming from temporary topic endpoint, which is attracting messages to '
-                        + replier.requestTopicName);
                 } catch (error) {
                     replier.log(error.toString());
                 }
@@ -141,7 +153,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
         if (replier.session !== null) {
             try {
                 var replyMsg = solace.SolclientFactory.createMessage();
-                var replyText = message.getBinaryAttachment() + " - Sample Reply";
+                var replyText = message.getBinaryAttachment().toString() + " - Sample Reply";
                 replyMsg.setBinaryAttachment(replyText);
                 replyMsg.setDestination(message.getReplyTo());
                 replyMsg.setCorrelationId(message.getCorrelationId());

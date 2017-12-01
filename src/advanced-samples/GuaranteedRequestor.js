@@ -22,6 +22,15 @@
  * Guaranteed Request/Reply tutorial - Guaranteed Requestor
  * Demonstrates how to send a guaranteed request message and
  * waits to receive a reply message as a response.
+ *
+ * This sample will show the implementation of guaranteed Request-Reply messaging,
+ * where `GuaranteedRequestor` is a message Endpoint that sends a guaranteed request message
+ * to a request topic and waits to receive a reply message on a dedicated temporary queue as
+ * a response; `GuaranteedReplier` is a message Endpoint that waits to receive a request message
+ * on a request topic - it will create a non-durable topic endpoint for that - and responds to
+ * it by sending a guaranteed reply message.
+ * Start the replier first as the non-durable topic endpoint will only be created for the
+ * duration of the replier session and any request sent before that will not be received.
  */
 
 /*jslint es6 devel:true node:true*/
@@ -42,7 +51,7 @@ var GuaranteedRequestor = function (solaceModule, requestTopicName) {
         console.log(timestamp + line);
     };
 
-    requestor.log('\n*** requestor to topic "' + requestor.topicName + '" is ready to connect ***');
+    requestor.log('\n*** requestor to topic "' + requestor.requestTopicName + '" is ready to connect ***');
 
     // main function
     requestor.run = function (argv) {
@@ -60,7 +69,7 @@ var GuaranteedRequestor = function (solaceModule, requestTopicName) {
             requestor.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         requestor.log('Connecting to Solace message router using url: ' + hosturl);

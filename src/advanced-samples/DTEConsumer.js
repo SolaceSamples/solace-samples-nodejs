@@ -21,6 +21,14 @@
  * Solace Systems Node.js API
  * Durable Topic Endpoint consumer tutorial - DTE Consumer
  * Demonstrates receiving persistent messages from a DTE
+ *
+ * This sample shows how to consume messages from a Durable Topic Endpoint (DTE). The sample will
+ * associate the DTE with the topic "tutorial/topic", so the `basic-samples/TopicPublisher` app can
+ * be used to send messages to this topic.
+ *
+ * Prerequisite: the DTE with the name "tutorial/dte" must have been provisioned on the message
+ * router vpn.  Ensure the DTE is enabled for both Incoming and Outgoing messages and set the
+ * Permission to at least 'Consume'.
  */
 
 /*jslint es6 node:true devel:true*/
@@ -62,7 +70,7 @@ var DTEConsumer = function (solaceModule, topicEndpointName, topicName) {
             consumer.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         consumer.log('Connecting to Solace message router using url: ' + hosturl);
@@ -117,12 +125,14 @@ var DTEConsumer = function (solaceModule, topicEndpointName, topicName) {
                     '" and ready to receive messages.');
             } else {
                 consumer.log('Starting consumer for DTE: ' + consumer.topicEndpointName);
-                consumer.log('The DTE will catch messages published to topic "' + consumer.topicName + '"');
+                consumer.log('The DTE will attract messages published to topic "' + consumer.topicName + '"');
                 try {
                     // Create a message consumer
                     consumer.messageConsumer = consumer.session.createMessageConsumer({
                         topicEndpointSubscription: consumer.topicName,
-                        queueDescriptor: { name: consumer.topicEndpointName, type: solace.QueueType.TOPIC_ENDPOINT }
+                        queueDescriptor: { name: consumer.topicEndpointName, type: solace.QueueType.TOPIC_ENDPOINT },
+                        // Not setting acknowledgeMode so it will default to ‘AUTO’ and therefore the on(MESSAGE)
+                        // listener does not have to call acknowledge.
                     });
                     // Define message consumer event listeners
                     consumer.messageConsumer.on(solace.MessageConsumerEventName.UP, function () {

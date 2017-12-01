@@ -50,7 +50,7 @@ var BasicRequestor = function (solaceModule, topicName) {
     // Establishes connection to Solace message router
     requestor.connect = function (argv) {
         if (requestor.session !== null) {
-            requestor.log('Already connected and ready to publish.');
+            requestor.log('Already connected and ready to send requests.');
             return;
         }
         // extract params
@@ -58,7 +58,7 @@ var BasicRequestor = function (solaceModule, topicName) {
             requestor.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         requestor.log('Connecting to Solace message router using url: ' + hosturl);
@@ -135,7 +135,8 @@ var BasicRequestor = function (solaceModule, topicName) {
 
     // Callback for replies
     requestor.replyReceivedCb = function (session, message) {
-        requestor.log('Received reply: "' + message.getSdtContainer().getValue() + '"');
+        requestor.log('Received reply: "' + message.getSdtContainer().getValue() + '"' +
+            ' details:\n' + message.dump());
         requestor.exit();
     };
 

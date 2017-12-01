@@ -20,8 +20,16 @@
 /**
  * Solace Systems Node.js API
  * Event Monitor tutorial - Event Subscriber
- * Demonstrates subscribing to the router event topic for Client
- * Connect events
+ * Demonstrates subscribing to the router event topic for Client Connect events
+ *
+ * This sample is making use of the special event monitoring topic subscriptions to build
+ * an application that monitors message router generated events.
+ * Start this sample then run any other sample app and observe a client connect event reported
+ * for that sample. To learn more, refer to
+ * https://docs.solace.com/System-and-Software-Maintenance/Subscribing-to-MBus-Events.htm
+ * in the customer documentation.
+ *
+ * Prerequisite: configure the vpn on the message router to "Publish Client Event Messages".
  */
 
 /*jslint es6 node:true devel:true*/
@@ -53,7 +61,7 @@ var EventSubscriber = function (solaceModule) {
     // Establishes connection to Solace message router
     subscriber.connect = function (argv) {
         if (subscriber.session !== null) {
-            subscriber.log('Already connected and ready to consume messages.');
+            subscriber.log('Already connected and ready to subscribe to events.');
             return;
         }
         // extract params
@@ -61,7 +69,7 @@ var EventSubscriber = function (solaceModule) {
             subscriber.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         subscriber.log('Connecting to Solace message router using url: ' + hosturl);

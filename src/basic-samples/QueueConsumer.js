@@ -52,7 +52,7 @@ var QueueConsumer = function (solaceModule, queueName) {
     // Establishes connection to Solace message router
     consumer.connect = function (argv) {
         if (consumer.session !== null) {
-            consumer.log('Already connected and ready to publish.');
+            consumer.log('Already connected and ready to consume messages.');
             return;
         }
         // extract params
@@ -60,7 +60,7 @@ var QueueConsumer = function (solaceModule, queueName) {
             consumer.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         consumer.log('Connecting to Solace message router using url: ' + hosturl);
@@ -111,7 +111,8 @@ var QueueConsumer = function (solaceModule, queueName) {
     consumer.startConsume = function () {
         if (consumer.session !== null) {
             if (consumer.consuming) {
-                consumer.log('Already started consumer for queue "' + consumer.queueName + '" and ready to receive messages.');
+                consumer.log('Already started consumer for queue "' + consumer.queueName +
+                    '" and ready to receive messages.');
             } else {
                 consumer.log('Starting consumer for queue: ' + consumer.queueName);
                 try {

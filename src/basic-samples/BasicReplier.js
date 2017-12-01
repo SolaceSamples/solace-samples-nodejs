@@ -41,7 +41,7 @@ var BasicReplier = function (solaceModule, topicName) {
         console.log(timestamp + line);
     };
 
-    replier.log('*** replier to topic "' + replier.topicName + '" is ready to connect ***');
+    replier.log('\n*** replier to topic "' + replier.topicName + '" is ready to connect ***');
 
     // main function
     replier.run = function (argv) {
@@ -51,7 +51,7 @@ var BasicReplier = function (solaceModule, topicName) {
     // Establishes connection to Solace message router
     replier.connect = function (argv) {
         if (replier.session !== null) {
-            replier.log('Already connected and ready to subscribe to request topic.');
+            replier.log('Already connected and ready to ready to receive requests.');
             return;
         }
         // extract params
@@ -59,7 +59,7 @@ var BasicReplier = function (solaceModule, topicName) {
             replier.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         replier.log('Connecting to Solace message router using url: ' + hosturl);
@@ -176,10 +176,13 @@ var BasicReplier = function (solaceModule, topicName) {
         replier.log('Replying...');
         if (replier.session !== null) {
             var reply = solace.SolclientFactory.createMessage();
-            var replyText = message.getSdtContainer().getValue() + " - Sample Reply";
-            reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, replyText));
-            replier.session.sendReply(message, reply);
-            replier.log('Replied.');
+            var sdtContainer = message.getSdtContainer();
+            if (sdtContainer.getType() === solace.SDTFieldType.STRING) {
+                var replyText = message.getSdtContainer().getValue() + " - Sample Reply";
+                reply.setSdtContainer(solace.SDTField.create(solace.SDTFieldType.STRING, replyText));
+                replier.session.sendReply(message, reply);
+                replier.log('Replied.');
+            }
         } else {
             replier.log('Cannot reply: not connected to Solace message router.');
         }

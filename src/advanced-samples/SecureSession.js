@@ -21,7 +21,21 @@
  * Solace Systems Node.js API
  * Secure Session tutorial
  * Demonstrates the use of secure session and
- * server and client certificate authentication 
+ * server and client certificate authentication
+ *
+ * Prerequisites:
+ * Following certificates and key must be locally available in the `certs` folder
+ * under `advanced-samples`.
+ * It is assumed that you know how TLS/SSL certificates and Certificate Authorities ("CAs") work
+ * and you have generated the required private/public keys and certificates using ssl tools.
+ * root_ca-rsa.crt - root certificate of the Certificate Authority which signed the message router's
+ *     certificate
+ * client1-rsa-1.crt - client certificate
+ * client1-rsa-1.key - client private key
+ * On the message router:
+ * server trusted root is configured - root certificate of the Certificate Authority
+ * which signed the client certificate
+ * server certificate including private key is configured
  */
 
 /*jslint es6 node:true devel:true*/
@@ -65,10 +79,15 @@ var SecureTopicSubscriber = function (solaceModule, topicName) {
         if (argv.length < (2 + 3)) { // expecting 3 real arguments
             subscriber.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
-                'Available protocols are ws://, wss://, http://, https://');
-            return;
+                'Available protocols are wss://, https://');
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
+        // check for using secure protocols for this sample
+        if (hosturl.lastIndexOf('wss://', 0) !== 0 && hosturl.lastIndexOf('https://', 0) !== 0) {
+            subscriber.log('This sample expects to use secure protocols: wss:// or https://');
+            process.exit();
+        }
         subscriber.log('Connecting to Solace message router using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];

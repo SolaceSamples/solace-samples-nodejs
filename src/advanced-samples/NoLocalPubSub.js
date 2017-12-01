@@ -22,9 +22,13 @@
  * NoLocal tutorial
  * Demonstrates the use of the NO_LOCAL Session and MessageConsumer properties.
  *
+ * With these properties enabled, messages published on a Session cannot be received on that
+ * same session or on a Consumer on that Session even when there is a matching subscription.
+ * This sample will create and use a temporary queue.
+ *
  * This sample will:
  *  - Subscribe to a Topic for Direct messages on a Session with No Local delivery enabled.
- *  - Create a message consumer to a Queue with No Local Delivery enabled on the Message Consumer,
+ *  - Create a message Consumer to a Queue with No Local Delivery enabled on the Message Consumer,
  *    but not on the Session.
  *  - Publish a Direct message on each Session, and verify it is not delivered locally.
  *  - Publish a message to the Queue on each Session, and verify it is not delivered locally.
@@ -70,7 +74,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
             sample.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         sample.log('Connecting to Solace message router using url: ' + hosturl);
@@ -91,28 +95,33 @@ var NoLocalPubSub = function (solaceModule, topicName) {
             // session 1: session level NoLocal is not set,
             // consuming on queue with message consumer level NoLocal is SET
             sessionProperties.noLocal = false;
-            sample.session1 = sample.createSession('Session1 (session NoLocal=false, ' +
-                'message consumer NoLocal=true)', sessionProperties, false, true);
+            sample.session1 = sample.createSession({
+                sessionName: 'Session1 (session NoLocal=false, message consumer NoLocal=true)',
+                sessionProperties: sessionProperties,
+                isDirectSubscriberFlag: false,
+                isConsumerFlag: true });
             sample.session1.connect();
             // session 2: session level NoLocal is SET, will consume direct messages on topic
             sessionProperties.noLocal = true;
-            sample.session2 = sample.createSession('Session2 (session NoLocal=true, ' +
-                'direct message consumer)', sessionProperties, true, false);
+            sample.session2 = sample.createSession({
+                sessionName: 'Session2 (session NoLocal=true, direct message consumer)',
+                sessionProperties: sessionProperties,
+                isDirectSubscriberFlag: true,
+                isConsumerFlag: false, });
             sample.session2.connect();
         } catch (error) {
             sample.log(error.toString());
         }
     };
 
-    sample.createSession = function (sessionName, sessionProperties,
-                                     subscribeDirectTopicFlag, consumeFlowQueueFlag) {
+    sample.createSession = function (params) {
         // create session
         var session = null;
-        session = solace.SolclientFactory.createSession(sessionProperties);
+        session = solace.SolclientFactory.createSession(params.sessionProperties);
         // define session event listeners
         session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
-            sample.log('=== ' + sessionName + ' successfully connected ===');
-            if (subscribeDirectTopicFlag) {
+            sample.log('=== ' + params.sessionName + ' successfully connected ===');
+            if (params.isDirectSubscriberFlag) {
                 if (!session.isCapable(solace.CapabilityType.NO_LOCAL)) {
                     sample.log('This sample requires an appliance with support for NO_LOCAL.');
                     sample.exit();
@@ -125,7 +134,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
                 );
                 sample.log('Subscribed to topic: ' + sample.topicName);
             };
-            if (consumeFlowQueueFlag) {
+            if (params.isConsumerFlag) {
                 // Create the message consumer with NoLocal SET
                 var messageConsumer = session.createMessageConsumer({
                     queueDescriptor: { type: solace.QueueType.QUEUE, durable: false },
@@ -137,7 +146,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
                 });
                 // Define message consumer event listeners
                 messageConsumer.on(solace.MessageConsumerEventName.UP, function () {
-                    sample.log('=== ' + sessionName + ' consumer flow to temporary queue is up. ===');
+                    sample.log('=== ' + params.sessionName + ' consumer to temporary queue is up. ===');
                     sample.queueDestination = messageConsumer.getDestination();
                     // start demo if both sessions up
                     if (sample.sessionsUp === 2) {
@@ -146,7 +155,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
                 });
                 // Define message event listener
                 messageConsumer.on(solace.MessageConsumerEventName.MESSAGE, function (message) {
-                    sample.log('Received ' + message.getBinaryAttachment() + '! - session: ' + sessionName + ', ' +
+                    sample.log('Received ' + message.getBinaryAttachment() + '! - session: ' + params.sessionName + ', ' +
                         'guaranteed message.');
                 });
                 // Connect the message consumer
@@ -158,10 +167,10 @@ var NoLocalPubSub = function (solaceModule, topicName) {
             sample.log('Connection failed to the message router: ' + sessionEvent.infoStr +
                 ' - check correct parameter values and connectivity!');
         });
-        if (subscribeDirectTopicFlag) {
+        if (params.isDirectSubscriberFlag) {
             // define message event listener
             session.on(solace.SessionEventCode.MESSAGE, function (message) {
-                sample.log('Received ' + message.getBinaryAttachment() + '! - session: ' + sessionName + ',' +
+                sample.log('Received ' + message.getBinaryAttachment() + '! - session: ' + params.sessionName + ',' +
                     'direct message.');
             });
         };

@@ -51,7 +51,7 @@ var QueueProducer = function (solaceModule, queueName) {
     // Establishes connection to Solace message router
     producer.connect = function (argv) {
         if (producer.session !== null) {
-            producer.log('Already connected and ready to publish.');
+            producer.log('Already connected and ready to send messages.');
             return;
         }
         // extract params
@@ -59,7 +59,7 @@ var QueueProducer = function (solaceModule, queueName) {
             producer.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
                 'Available protocols are ws://, wss://, http://, https://');
-            return;
+            process.exit();
         }
         var hosturl = argv.slice(2)[0];
         producer.log('Connecting to Solace message router using url: ' + hosturl);
