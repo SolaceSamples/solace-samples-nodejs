@@ -36,7 +36,6 @@ The goal of this tutorial is to understand the following:
 {% else %}
     {% include solaceMessaging.md %}
 {% endif %}  
-{% include solaceApi.md %}
 
 ## Overview
 

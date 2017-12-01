@@ -39,7 +39,6 @@ The goal of this tutorial is to demonstrate the most basic messaging interaction
 {% else %}
     {% include solaceMessaging.md %}
 {% endif %}  
-{% include solaceApi.md %}
 
 ## Obtaining the Solace API
 
