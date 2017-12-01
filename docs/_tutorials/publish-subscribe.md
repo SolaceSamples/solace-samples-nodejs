@@ -40,61 +40,9 @@ The goal of this tutorial is to demonstrate the most basic messaging interaction
     {% include solaceMessaging.md %}
 {% endif %}  
 
-## Obtaining the Solace API
+{% include solaceApi.md %}
 
-This tutorial depends on you having Solace Node.js API version 10 or later downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Running the Samples section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the instructions appropriately.
-
-The API Reference is available online at the [Node.js API documentation]({{ site.docs-api-reference }}){:target="_top"}.
-
-### Get the API: Using the npmjs repository
-
-This will locate and download compatible library packages from the `npmjs` public repository using the local `package.json` specs.
-
-```
-npm install
-```
-
-### Get the API: Using the Solace Developer Portal
-
-The Solace Node.js API distribution package can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. Install the included tar.gz tarball package named `node-solclientjs-<version>.tar.gz`:
-	
-```
-npm install <path_to_tarball_directory>/node-solclientjs-<version>.tar.gz 
-```
-
-## Trying it yourself
-
-This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
-
-At the end, this tutorial walks through downloading and running the sample from source.
-
-## Loading and Initializing the Solace Node.js API
-
-To load the Solace Node.js API into your Node.js application simply include the `solclientjs` module.
-
-```javascript
-var solace = require('solclientjs');
-```
-
-Use the debug version of the API of the `solclientjs` module instead, if you’re planning to see console log messages and/or debug it.
-
-```javascript
-var solace = require('solclientjs').debug; // logging is supported here
-```
-
-Then initialize the `SolclientFactory`, which is the first entry point to the API. Add the following to initialize with the latest `version10` behavior profile to run with the default property values that Solace recommends at the time of the version 10 release.
-
-```javascript
-var factoryProps = new solace.SolclientFactoryProperties();
-factoryProps.profile = solace.SolclientFactoryProfiles.version10;
-solace.SolclientFactory.init(factoryProps);
-```
-
-If the debug version of the API has been loaded the required level of logging can be set like so:
-
-```javascript
-solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
-```
+{% include loadAndInitSolaceApi.md %}
 
 ## Connecting to the Solace message router
 

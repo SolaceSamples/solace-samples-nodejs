@@ -1,26 +1,29 @@
 
 ## Obtaining the Solace API
 
-This tutorial depends on you having the Solace Systems Node.js API downloaded and available. The Solace Systems Node.js API distribution package can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. The Node.js API is distributed as a zip file containing the required JavaScript files, API documentation, and examples. The instructions in this tutorial assume you have downloaded the Node.js API library and unpacked it to a known location.
+This tutorial depends on you having Solace Node.js API version 10 or later downloaded and available. Here are a few easy ways to get the Node.js API. The instructions in the Running the Samples section assume you're pulling the packages from the `npmjs` public repository. If your environment differs then adjust the instructions appropriately.
 
-## Loading Solace Systems Node.js API
+The API Reference is available online at the [Node.js API documentation]({{ site.docs-api-reference }}){:target="_top"}.
 
-To load the Solace Systems Node.js API into your Node.js application simply include the `lib/solclientjs` module from the distribution.
+### Get the API: Using the npmjs repository
 
-```javascript
-var solace = require('./lib/solclientjs');
+This will locate and download compatible library packages from the `npmjs` public repository using the local `package.json` specs.
+
+```
+npm install
 ```
 
-Use the debug version of the API in `lib/solclient-debug` module instead, if you’re planning to see console log messages and/or debug it.
+### Get the API: Using the Solace Developer Portal
 
-```javascript
-var solace = require('./lib/solclient-debug');
+The Solace Node.js API distribution package can be [downloaded here]({{ site.links-downloads }}){:target="_top"}. Install the included tar.gz tarball package named `node-solclientjs-<version>.tar.gz`:
+	
+```
+npm install <path_to_tarball_directory>/node-solclientjs-<version>.tar.gz 
 ```
 
-If the debug version is used, it is necessary to initialize solace.SolclientFactory with required level of logging like so:
+## Trying it yourself
 
-```javascript
-var factoryProps = new solace.SolclientFactoryProperties();
-factoryProps.logLevel = solace.LogLevel.WARN;
-solace.SolclientFactory.init(factoryProps);
-```
+This tutorial is available in [GitHub]({{ site.repository }}){:target="_blank"} along with the other [Solace Developer Getting Started Examples]({{ site.links-get-started }}){:target="_top"}.
+
+At the end, this tutorial walks through downloading and running the sample from source.
+
