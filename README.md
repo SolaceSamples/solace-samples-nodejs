@@ -24,12 +24,12 @@ This repository contains:
 
 * Additional sample code, showing how to make use of **advanced** features of the Solace message router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples).
 
-    - [Secure Session](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to use secure connection to the server, and server and client certificate authentication.
-    - [Active Consumer Indication](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how multiple consumers can bind to an exclusive queue, but only one client at a time can actively receive messages.
-    - [Durable Topic Endpoint Consumer](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to consume messages from a Durable Topic Endpoint (DTE).
-    - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to monitor message router generated events.
-    - [GuaranteedRequestor/Replier](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to set up guaranteed request/reply messaging.
-    - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to prevent messages published on a session or consumer received on that same session or consumer.
+    - [Secure Session](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/SecureSession.js): Learn how to use secure connection to the server, and server and client certificate authentication.
+    - [Active Consumer Indication](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/ActiveConsumerIndication.js): Learn how multiple consumers can bind to an exclusive queue, but only one client at a time can actively receive messages.
+    - [Durable Topic Endpoint Consumer](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/DTEConsumer.js): Learn how to consume messages from a Durable Topic Endpoint (DTE).
+    - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/EventMonitor.js): Learn how to monitor message router generated events.
+    - [GuaranteedRequestor](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/GuaranteedRequestor.js)/[Replier](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/GuaranteedReplier.js): Learn how to set up guaranteed request/reply messaging.
+    - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/advanced-samples/NoLocalPubSub.js): Learn how to prevent messages published on a session or consumer received on that same session or consumer.
 
 ## Checking out
 
