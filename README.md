@@ -1,4 +1,5 @@
 # Getting Started Examples
+
 ## Solace Node.js API
 
 The "Getting Started" tutorials will get you up to speed and sending messages with Solace technology as quickly as possible. There are three ways you can get started:
@@ -9,26 +10,59 @@ The "Getting Started" tutorials will get you up to speed and sending messages wi
 
 ## Contents
 
-This repository contains code and matching tutorial walk throughs for five different basic Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
+This repository contains:
 
-## Checking out and Building
+* Code and matching tutorial walk throughs for five different **basic** Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://solacesamples.github.io/solace-samples-nodejs/).
 
-To check out the project and build it, do the following:
+    See the individual tutorials for details:
 
-  1. clone this GitHub repository
-  1. `cd solace-samples-nodejs`
+    - [Publish/Subscribe](https://solacesamples.github.io/solace-samples-nodejs/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
+    - [Persistence](https://solacesamples.github.io/solace-samples-nodejs/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
+    - [Request/Reply](https://solacesamples.github.io/solace-samples-nodejs/request-reply): Learn how to set up request/reply messaging.
+    - [Confirmed Delivery](https://solacesamples.github.io/solace-samples-nodejs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
+    - [Topic to Queue Mapping](https://solacesamples.github.io/solace-samples-nodejs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
+
+* Additional sample code, showing how to make use of **advanced** features of the Solace message router is available in the [advanced-samples directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples).
+
+    - [Secure Session](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to use secure connection to the server, and server and client certificate authentication.
+    - [Active Consumer Indication](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how multiple consumers can bind to an exclusive queue, but only one client at a time can actively receive messages.
+    - [Durable Topic Endpoint Consumer](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to consume messages from a Durable Topic Endpoint (DTE).
+    - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to monitor message router generated events.
+    - [GuaranteedRequestor/Replier](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to set up guaranteed request/reply messaging.
+    - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples): Learn how to prevent messages published on a session or consumer received on that same session or consumer.
+
+## Checking out
+
+To check out the project, clone this GitHub repository:
+
+```
+git clone https://github.com/SolaceSamples/solace-samples-nodejs
+cd solace-samples-nodejs
+```
  
-### Download the Solace JavaScript API
+Note: the code in the `master` branch of this repository depends on Solace Node.js API version 10 or later. If you want to work with an older version clone the branch that corresponds your version.
+    
+### Download the Solace Node.js API
 
-The Solace Node.js API library can be [downloaded here](http://dev.solace.com/downloads/).  The instructions in this tutorial assume you have downloaded the Web Messaging API for JavaScript library and unpacked it to a known location. The samples assume a `lib` subdirectory within each samples directory. For example `src/lib`.
+These samples depend on version 10 or later of the Solace Node.js API library.
+
+The library can be installed from the `npmjs` central repository using the `package.json` specs.
+
+For a local installation of the API package, run from the current `solace-samples-nodejs` directory:
+
+```
+npm install
+```
 
 ## Running the Samples
 
-The samples are found in the `src` directory.
+The samples are found in the `src/basic-samples` and `src/advanced-samples` directories.
 
 You run the sample using node. For example:
 
-    node TopicPublisher.js <HOST>
+```
+node TopicPublisher.js <protocol://host:port> <client-username>@<message-vpn> <client-password>
+```
 
 See the [tutorials](https://solacesamples.github.io/solace-samples-nodejs/) for more details.
 
@@ -38,7 +72,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 
 ## Authors
 
-See the list of [contributors](https://github.com/SolaceSamples/solace-samples-template/contributors) who participated in this project.
+See the list of [contributors](https://github.com/SolaceSamples/solace-samples-nodejs/contributors) who participated in this project.
 
 ## License
 
