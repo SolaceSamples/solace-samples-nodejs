@@ -187,7 +187,7 @@ Clone the GitHub repository containing the Solace samples.
 
 ```
 git clone {{ site.repository }}
-cd {{ site.baseurl | remove: '/'}}
+cd {{ site.repository | split: '/' | last}}
 ```
  
 Note: the code in the `master` branch of this repository depends on Solace Node.js API version 10 or later. If you want to work with an older version clone the branch that corresponds your version.
