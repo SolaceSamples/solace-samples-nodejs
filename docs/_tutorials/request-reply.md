@@ -21,11 +21,7 @@ This tutorial assumes the following:
     *   Connectivity information for a Solace message-VPN
     *   Enabled client username and password
 
-{% if jekyll.environment == 'solaceCloud' %}
 One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
-{% else %}
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
-{% endif %}
 
 ## Goals
 
@@ -39,11 +35,7 @@ The goals of this tutorial are to understand the following:
     1.  How to detect a request expecting a reply
     2.  How to generate a reply message
 
-{% if jekyll.environment == 'solaceCloud' %}
-    {% include solaceMessaging-cloud.md %}
-{% else %}
-    {% include solaceMessaging.md %}
-{% endif %}  
+{% include solaceMessaging.md %}
 
 ## Overview
 
@@ -68,7 +60,7 @@ The structure of the requestor application is similar to the publish/subscribe t
 The structure of the replier application is similar to the topic subscriber. It differs in that when receiving the request it doesn't only log the message but sends a reply.
 
 The followings are exactly the same as in the [publish/subscribe tutorial]({{ site.baseurl }}/publish-subscribe), refer to it for all the detailed descriptions.
-    
+
 * Loading and Initializing Solace Node.js API
 * Connecting to the Solace message router
 * Session Events
@@ -176,7 +168,7 @@ Clone the GitHub repository containing the Solace samples.
 git clone {{ site.repository }}
 cd {{ site.repository | split: '/' | last}}
 ```
- 
+
 Note: the code in the `master` branch of this repository depends on Solace Node.js API version 10 or later. If you want to work with an older version clone the branch that corresponds your version.
 
 ### Installing the Node.js API
@@ -268,4 +260,3 @@ Binary Attachment:                      len=17
 With that you now know how to successfully implement the request-reply message exchange pattern using Direct messages.
 
 If you have any issues sending and replying a message, check the [Solace community Q&A]({{ site.links-community }}){:target="_top"} for answers to common issues seen.
-
