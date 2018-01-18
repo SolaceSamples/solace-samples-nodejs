@@ -21,11 +21,7 @@ This tutorial assumes the following:
     *   Connectivity information for a Solace message-VPN
     *   Enabled client username and password
 
-{% if jekyll.environment == 'solaceCloud' %}
 One simple way to get access to Solace messaging quickly is to create a messaging service in Solace Cloud [as outlined here]({{ site.links-solaceCloud-setup}}){:target="_top"}. You can find other ways to get access to Solace messaging below.
-{% else %}
-One simple way to get access to a Solace message router is to start a Solace VMR load [as outlined here]({{ site.docs-vmr-setup }}){:target="_top"}. By default the Solace VMR will with the “default” message VPN configured and ready for guaranteed messaging. Going forward, this tutorial assumes that you are using the Solace VMR. If you are using a different Solace message router configuration adapt the tutorial appropriately to match your configuration.
-{% endif %}
 
 ## Goals
 
@@ -34,12 +30,7 @@ The goal of this tutorial is to demonstrate the most basic messaging interaction
 1.  How to build and send a message on a topic
 2.  How to subscribe to a topic and receive a message
 
-{% if jekyll.environment == 'solaceCloud' %}
-    {% include solaceMessaging-cloud.md %}
-{% else %}
-    {% include solaceMessaging.md %}
-{% endif %}  
-
+{% include solaceMessaging.md %}
 {% include solaceApi.md %}
 
 {% include loadAndInitSolaceApi.md %}
@@ -50,7 +41,7 @@ In order to send or receive messages, an application must connect a Solace sessi
 
 The `solace.SolclientFactory` is used to create a Solace `Session` from `SessionProperties`. In the example below, `SessionProperties` is created using object initializers.
 
-Then listeners are defined for Session Events of interest and for receiving direct messages, which are explained in the next sections. 
+Then listeners are defined for Session Events of interest and for receiving direct messages, which are explained in the next sections.
 
 The created session connects to the Solace message router with the `session.connect()` call.
 
@@ -256,7 +247,7 @@ Clone the GitHub repository containing the Solace samples.
 git clone {{ site.repository }}
 cd {{ site.repository | split: '/' | last}}
 ```
- 
+
 Note: the code in the `master` branch of this repository depends on Solace Node.js API version 10 or later. If you want to work with an older version clone the branch that corresponds your version.
 
 ### Installing the Node.js API
