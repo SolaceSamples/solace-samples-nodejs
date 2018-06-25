@@ -30,10 +30,10 @@ The goal of this tutorial is to demonstrate the most basic messaging interaction
 1.  How to build and send a message on a topic
 2.  How to subscribe to a topic and receive a message
 
-{% include solaceMessaging.md %}
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %}
+{% include_relative assets/solaceApi.md %}
 
-{% include loadAndInitSolaceApi.md %}
+{% include_relative assets/loadAndInitSolaceApi.md %}
 
 ## Connecting to the Solace message router
 
@@ -150,7 +150,7 @@ See `solace.SessionEventCode` in the [Node.js API Reference]({{ site.docs-api-re
 
 This tutorial uses “Direct” messages which are at most once delivery messages. So first, let’s create a listener and express interest in the messages by subscribing to a Solace topic. Then you can look at publishing a matching message and see it received.
 
-![]({{ site.baseurl }}/images/pub-sub-receiving-message-300x134.png)
+![]({{ site.baseurl }}/assets/images/pub-sub-receiving-message-300x134.png)
 
 With a subscriber session created in the previous step, we declare a message event listener.
 
@@ -199,7 +199,7 @@ After the subscription is successfully added the subscriber is ready to receive 
 
 Now it is time to send a message to the waiting consumer.
 
-![]({{ site.baseurl }}/images/pub-sub-sending-message-300x134.png)
+![]({{ site.baseurl }}/assets/images/pub-sub-sending-message-300x134.png)
 
 ### Creating and sending the message
 

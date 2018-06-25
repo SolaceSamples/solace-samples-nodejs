@@ -30,8 +30,8 @@ The goal of this tutorial is to understand the following:
 1.  How to send a guaranteed message to a Solace queue
 2.  How to bind to this queue and receive a guaranteed message
 
-{% include solaceMessaging.md %}
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## Prerequisite: Creating a Durable Queue on the Solace message router
 
@@ -39,7 +39,7 @@ A difference with the publish/subscribe tutorial is that for guaranteed messagin
 
 You can use SolAdmin or SEMP to create a durable queue. This tutorial assumes that the queue named `tutorial/queue` has been created.  Ensure the queue is enabled for both Incoming and Outgoing messages and set the Permission to at least "Consume".
 
-{% include loadAndInitSolaceApi.md %}
+{% include_relative assets/loadAndInitSolaceApi.md %}
 
 ## Implementing Guaranteed Messaging
 
@@ -116,7 +116,7 @@ Note that the application logic can be triggered only after receiving the `solac
 
 Now it is time to send a message to the queue. Remember that the queue must be pre-configured on the message router as described in the "Creating a Durable Queue" section.
 
-![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
+![sending-message-to-queue]({{ site.baseurl }}/assets/images/sending-message-to-queue-300x160.png)
 
 The actual method calls to create and send guaranteed messages to a queue are similar to those used for direct messages in the publish/subscribe tutorial. The differences are:
 * a durable queue type destination is created and used; and
@@ -143,7 +143,7 @@ At this point the producer has sent a message to the Solace message router and i
 
 Now it is time to receive the messages sent to your queue.
 
-![]({{ site.baseurl }}/images/receiving-message-from-queue-300x160.png)
+![]({{ site.baseurl }}/assets/images/receiving-message-from-queue-300x160.png)
 
 Receiving guaranteed messages is different from the direct messaging case described in the the publish/subscribe tutorial.
 

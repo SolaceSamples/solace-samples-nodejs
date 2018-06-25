@@ -35,7 +35,7 @@ The goals of this tutorial are to understand the following:
     1.  How to detect a request expecting a reply
     2.  How to generate a reply message
 
-{% include solaceMessaging.md %}
+{% include_relative assets/solaceMessaging.md %}
 
 ## Overview
 
@@ -45,11 +45,11 @@ Request-reply messaging is supported by the Solace message router for all delive
 
 For request-reply messaging to be successful it must be possible for the requestor to correlate the request with the subsequent reply. Solace messages support two fields that are needed to enable request-reply correlation. The reply-to field can be used by the requestor to indicate a Solace Topic where the reply should be sent. A natural choice for this is often the unique `P2PINBOX_IN_USE` topic which is an auto-generated unique topic per client which is accessible as a session property. The second requirement is to be able to detect the reply message from the stream of incoming messages. This is accomplished using the `correlation-id` field. This field will transit the Solace messaging system unmodified. Repliers can include the same `correlation-id` in a reply message to allow the requestor to detect the corresponding reply. The figure below outlines this exchange.
 
-![]({{ site.baseurl }}/images/Request-Reply_diagram-1.png)
+![]({{ site.baseurl }}/assets/images/Request-Reply_diagram-1.png)
 
 For direct messages however, this is simplified through the use of the `Requestor` object as shown in this sample.
 
-{% include solaceApi.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## Implementing Request/Reply
 
@@ -69,7 +69,7 @@ The followings are exactly the same as in the [publish/subscribe tutorial]({{ si
 
 First let’s look at the requestor. This is the application that will send the initial request message and wait for the reply.
 
-![]({{ site.baseurl }}/images/Request-Reply_diagram-2.png)
+![]({{ site.baseurl }}/assets/images/Request-Reply_diagram-2.png)
 
 The requestor must create a message and the topic to send the message to:
 
@@ -105,7 +105,7 @@ try {
 
 Now it is time to receive the request and generate an appropriate reply.
 
-![]({{ site.baseurl }}/images/Request-Reply_diagram-3.png)
+![]({{ site.baseurl }}/assets/images/Request-Reply_diagram-3.png)
 
 Just as with previous tutorials, you still need to connect a session and subscribe to the topics that requests are sent on (the request topic). The following is an example of such a reply.
 
