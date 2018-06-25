@@ -79,13 +79,15 @@ var SecureTopicSubscriber = function (solaceModule, topicName) {
         if (argv.length < (2 + 3)) { // expecting 3 real arguments
             subscriber.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
-                'Available protocols are wss://, https://');
+                'Available protocols are wss://, https://, tcps://');
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
         // check for using secure protocols for this sample
-        if (hosturl.lastIndexOf('wss://', 0) !== 0 && hosturl.lastIndexOf('https://', 0) !== 0) {
-            subscriber.log('This sample expects to use secure protocols: wss:// or https://');
+        if (hosturl.lastIndexOf('wss://', 0) !== 0 &&
+          hosturl.lastIndexOf('https://', 0) !== 0 &&
+          hosturl.lastIndexOf('tcps://', 0) !== 0) {
+            subscriber.log('This sample expects to use secure protocols: wss://, https://, or tcps://');
             process.exit();
         }
         subscriber.log('Connecting to Solace message router using url: ' + hosturl);
