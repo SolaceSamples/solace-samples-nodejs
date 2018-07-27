@@ -118,9 +118,11 @@ Now it is time to send a message to the queue. Remember that the queue must be p
 
 ![sending-message-to-queue]({{ site.baseurl }}/assets/images/sending-message-to-queue-300x160.png)
 
-The actual method calls to create and send guaranteed messages to a queue are similar to those used for direct messages in the publish/subscribe tutorial. The differences are:
-* a durable queue type destination is created and used; and
-* the delivery mode is set to PERSISTENT.
+In the simplest case, the actual method calls to create and send guaranteed messages to a queue are similar to those used for direct messages in the publish/subscribe tutorial. The differences are:
+* a durable queue type destination is created and used,
+* the delivery mode is set to PERSISTENT, and
+* delivery to the Solace message router is confirmed (shown in the [Confirmed Delivery tutorial.]({{ site.baseurl }}/confirmed-delivery))
+
 
 ```javascript
 var messageText = 'Sample Message';
@@ -130,6 +132,7 @@ message.setDestination(solace.SolclientFactory.createDurableQueueDestination(pro
 message.setBinaryAttachment(messageText);
 message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
 try {
+    // Delivery not yet confirmed. See ConfirmedPublish.js
     producer.session.send(message);
     producer.log('Message sent.');
 } catch (error) {
@@ -137,7 +140,7 @@ try {
 }
 ```
 
-At this point the producer has sent a message to the Solace message router and it will be waiting for your consumer on the queue.
+The message is transferred to the router asynchronously, but if all goes well, it will be waiting for your consumer on the queue. The [Confirmed Delivery tutorial]({{ site.baseurl }}/confirmed-delivery) shows how to make sure it gets there.
 
 ### Receiving a message from a queue
 
@@ -222,6 +225,8 @@ Combining the example source code shown above results in the following source co
 <li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
 {% endfor %}
 </ul>
+
+Learn how to verify all messages arrive to the Solace message router in our next tutorial, [Confirmed Delivery.]({{ site.baseurl }}/confirmed-delivery)
 
 ### Getting the Source
 
