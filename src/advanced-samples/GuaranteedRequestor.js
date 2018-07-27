@@ -68,7 +68,7 @@ var GuaranteedRequestor = function (solaceModule, requestTopicName) {
         if (argv.length < (2 + 3)) { // expecting 3 real arguments
             requestor.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
-                'Available protocols are ws://, wss://, http://, https://');
+                'Available protocols are ws://, wss://, http://, https://, tcp://, tcps://');
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
