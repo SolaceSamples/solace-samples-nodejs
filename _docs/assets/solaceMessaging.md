@@ -12,7 +12,7 @@ This tutorial requires access Solace messaging and requires that you know severa
   <tr>
     <td>Host</td>
     <td>String</td>
-    <td>This is the address clients use when connecting to the Solace messaging to send and receive messages (format: <code>protocol://DNS_NAME:Port</code> or <code>protocol://IP:Port</code>). The available protocols are <code>ws://</code>, <code>wss://</code>, <code>http://</code> and <code>https://</code></td>
+    <td>This is the address clients use when connecting to the Solace messaging to send and receive messages (format: <code>protocol://DNS_NAME:Port</code> or <code>protocol://IP:Port</code>). The available protocols are <code>ws://</code>, <code>wss://</code>, <code>http://</code>, <code>https://</code>, <code>tcp://</code>, <code>tcps://</code></td>
   </tr>
   <tr>
     <td>Message VPN</td>
