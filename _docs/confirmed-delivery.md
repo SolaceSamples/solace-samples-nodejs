@@ -28,7 +28,7 @@ The goal of this tutorial is to understand the following:
 
 *  How to properly handle guaranteed message acknowledgements on message send.
 
-{% include solaceMessaging.md %}
+{% include_relative assets/solaceMessaging.md %}
 
 
 ## Overview
@@ -47,7 +47,7 @@ const correlationKey = {
 };
 ```
 
-{% include solaceApi.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## Implementing Confirmed Delivery
 

@@ -30,8 +30,8 @@ The goal of this tutorial is to understand the following:
 1.  How to send a guaranteed message to a Solace queue
 2.  How to bind to this queue and receive a guaranteed message
 
-{% include solaceMessaging.md %}
-{% include solaceApi.md %}
+{% include_relative assets/solaceMessaging.md %}
+{% include_relative assets/solaceApi.md %}
 
 ## Prerequisite: Creating a Durable Queue on the Solace message router
 
@@ -39,7 +39,7 @@ A difference with the publish/subscribe tutorial is that for guaranteed messagin
 
 You can use SolAdmin or SEMP to create a durable queue. This tutorial assumes that the queue named `tutorial/queue` has been created.  Ensure the queue is enabled for both Incoming and Outgoing messages and set the Permission to at least "Consume".
 
-{% include loadAndInitSolaceApi.md %}
+{% include_relative assets/loadAndInitSolaceApi.md %}
 
 ## Implementing Guaranteed Messaging
 
@@ -116,11 +116,13 @@ Note that the application logic can be triggered only after receiving the `solac
 
 Now it is time to send a message to the queue. Remember that the queue must be pre-configured on the message router as described in the "Creating a Durable Queue" section.
 
-![sending-message-to-queue]({{ site.baseurl }}/images/sending-message-to-queue-300x160.png)
+![sending-message-to-queue]({{ site.baseurl }}/assets/images/sending-message-to-queue-300x160.png)
 
-The actual method calls to create and send guaranteed messages to a queue are similar to those used for direct messages in the publish/subscribe tutorial. The differences are:
-* a durable queue type destination is created and used; and
-* the delivery mode is set to PERSISTENT.
+In the simplest case, the actual method calls to create and send guaranteed messages to a queue are similar to those used for direct messages in the publish/subscribe tutorial. The differences are:
+* a durable queue type destination is created and used,
+* the delivery mode is set to PERSISTENT, and
+* delivery to the Solace message router is confirmed (shown in the [Confirmed Delivery tutorial.]({{ site.baseurl }}/confirmed-delivery))
+
 
 ```javascript
 var messageText = 'Sample Message';
@@ -130,6 +132,7 @@ message.setDestination(solace.SolclientFactory.createDurableQueueDestination(pro
 message.setBinaryAttachment(messageText);
 message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
 try {
+    // Delivery not yet confirmed. See ConfirmedPublish.js
     producer.session.send(message);
     producer.log('Message sent.');
 } catch (error) {
@@ -137,13 +140,13 @@ try {
 }
 ```
 
-At this point the producer has sent a message to the Solace message router and it will be waiting for your consumer on the queue.
+The message is transferred to the Solace message router asynchronously, but if all goes well, it will be waiting for your consumer on the queue. The [Confirmed Delivery tutorial]({{ site.baseurl }}/confirmed-delivery) shows how to make sure it gets there.
 
 ### Receiving a message from a queue
 
 Now it is time to receive the messages sent to your queue.
 
-![]({{ site.baseurl }}/images/receiving-message-from-queue-300x160.png)
+![]({{ site.baseurl }}/assets/images/receiving-message-from-queue-300x160.png)
 
 Receiving guaranteed messages is different from the direct messaging case described in the the publish/subscribe tutorial.
 
@@ -222,6 +225,8 @@ Combining the example source code shown above results in the following source co
 <li><a href="{{ site.repository }}{{ item.link }}" target="_blank">{{ item.label }}</a></li>
 {% endfor %}
 </ul>
+
+Learn how to verify all messages arrive to the Solace message router in our next tutorial, [Confirmed Delivery.]({{ site.baseurl }}/confirmed-delivery)
 
 ### Getting the Source
 
