@@ -30,6 +30,7 @@ This repository contains:
     - [Event Monitor](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/EventMonitor.js): Learn how to monitor message router generated events.
     - [GuaranteedRequestor](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/GuaranteedRequestor.js)/[Replier](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/GuaranteedReplier.js): Learn how to set up guaranteed request/reply messaging.
     - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/NoLocalPubSub.js): Learn how to prevent messages published on a session or consumer received on that same session or consumer.
+    - [Compressed Publisher](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/CompressedPublisher.js): Minor variation on the Topic Publisher tutorial: adds compression.
 
 ## Checking out
 
