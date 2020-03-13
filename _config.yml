@@ -8,7 +8,7 @@ repository: https://github.com/SolaceSamples/solace-samples-nodejs
 
 # Links
 advanced-samples: //github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/advanced-samples
-links-community: //solace.com/support/
+links-community: //solace.community
 links-downloads: //solace.com/downloads/
 links-solaceCloud-setup: //solace.com/cloud/
 links-get-started-nodejs: //dev.solace.com/get-started/node-js-tutorials/
