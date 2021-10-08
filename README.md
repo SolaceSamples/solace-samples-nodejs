@@ -12,15 +12,15 @@ The "Getting Started" tutorials will get you up to speed and sending messages wi
 
 This repository contains:
 
-* Code and matching tutorial walk throughs for five different **basic** Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://dev.solace.com/samples/solace-samples-nodejs/).
+* Code and matching tutorial walk throughs for five different **basic** Solace messaging patterns. For a nice introduction to the Solace API and associated tutorials, check out the [tutorials home page](https://tutorials.solace.dev/nodejs).
 
     See the individual tutorials for details:
 
-    - [Publish/Subscribe](https://dev.solace.com/samples/solace-samples-nodejs/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
-    - [Persistence](https://dev.solace.com/samples/solace-samples-nodejs/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
-    - [Request/Reply](https://dev.solace.com/samples/solace-samples-nodejs/request-reply): Learn how to set up request/reply messaging.
-    - [Confirmed Delivery](https://dev.solace.com/samples/solace-samples-nodejs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
-    - [Topic to Queue Mapping](https://dev.solace.com/samples/solace-samples-nodejs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
+    - [Publish/Subscribe](https://tutorials.solace.dev/nodejs/publish-subscribe): Learn how to set up pub/sub messaging on a Solace VMR.
+    - [Persistence](https://tutorials.solace.dev/nodejs/persistence-with-queues): Learn how to set up persistence for guaranteed delivery.
+    - [Request/Reply](https://tutorials.solace.dev/nodejs/request-reply): Learn how to set up request/reply messaging.
+    - [Confirmed Delivery](https://tutorials.solace.dev/nodejs/confirmed-delivery): Learn how to confirm that your messages are received by a Solace message router.
+    - [Topic to Queue Mapping](https://tutorials.solace.dev/nodejs/topic-to-queue-mapping): Learn how to map existing topics to Solace queues.
 
 * Additional sample code, showing how to make use of advanced features of the Solace message router is available in the [features directory](https://github.com/SolaceSamples/solace-samples-nodejs/tree/master/src/features).
 
@@ -65,7 +65,7 @@ You run the sample using node. For example:
 node TopicPublisher.js <protocol://host:port> <client-username>@<message-vpn> <client-password>
 ```
 
-See the [tutorials](https://dev.solace.com/samples/solace-samples-nodejs/) for more details.
+See the [tutorials](https://tutorials.solace.dev/nodejs) for more details.
 
 ## Contributing
 
@@ -83,8 +83,7 @@ This project is licensed under the Apache License, Version 2.0. - See the [LICEN
 
 For more information try these resources:
 
-- [Tutorials](https://tutorials.solace.dev/)
-- The Solace Developer Portal website at: http://dev.solace.com
-- Get a better understanding of [Solace technology](https://solace.com/products/tech/).
+- [Solace API Tutorials](https://tutorials.solace.dev/)
+- The Solace Developer Portal website at: https://solace.dev
 - Check out the [Solace blog](http://dev.solace.com/blog/) for other interesting discussions around Solace technology
 - Ask the [Solace community.](https://solace.community)
