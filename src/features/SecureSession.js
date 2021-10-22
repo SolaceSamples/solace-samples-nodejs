@@ -125,6 +125,11 @@ var SecureTopicSubscriber = function (solaceModule, topicName) {
         // sessionProperties.sslPfx = subscriber.res('certs/client-rsa.pfx');
         // sessionProperties.sslPfxPassword = 'pfx_password';
 
+        // -> sslConnectionDowngradeTo: Send messages unencrypted. Use TLS for authentication only.
+        // WARNING! Messages are sent over the network in the clear, without encryption!
+        // sessionProperties.sslConnectionDowngradeTo = solace.SslDowngrade.PLAINTEXT;
+        // WARNING! The above disables encryption!
+
         // create session
         subscriber.session = solace.SolclientFactory.createSession(sessionProperties);
         // define session event listeners
