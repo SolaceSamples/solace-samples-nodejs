@@ -49,7 +49,7 @@ var GuaranteedSubscriber = function (solaceModule, queueName, topicName ) {
     subscriber.log('\n*** Consumer to queue "' + subscriber.queueName + '" is ready to connect ***');
     subscriber.log('\n/*********************************************************************' +
                     '\nNOTE: Before you proceed, please ensure that the required queue with ' +
-                    '\nappropriate subscription is created on the Broker.' +
+                    '\nappropriate subscription is created on the message router vpn.' +
                     '\n/********************************************************************/')
 
     // main function
@@ -238,7 +238,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the consumer, specifying the name of the queue
-var subscriber = new GuaranteedSubscriber(solace, 'tutorial/queue', 'solace/samples/js/pers/pub');
+var subscriber = new GuaranteedSubscriber(solace, 'tutorial/queue', 'solace/samples/nodejs/pers');
 
 // subscribe to messages on Solace message router
 subscriber.run(process.argv);

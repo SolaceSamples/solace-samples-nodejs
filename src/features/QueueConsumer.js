@@ -44,7 +44,7 @@ var QueueConsumer = function (solaceModule, queueName) {
 
     consumer.log('\n*** Consumer to queue "' + consumer.queueName + '" is ready to connect ***');
     consumer.log('\n/*********************************************************************' +
-    '\nNOTE: Before you proceed, please ensure that the required queue is created on the Broker.' +
+    '\nNOTE: Before you proceed, please ensure that the required queue is created on the message router vpn.' +
     '\n/*********************************************************************')
   
     // main function

@@ -190,6 +190,6 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the publisher, specifying the name of the destination topic
-var publisher = new GuaranteedPublisher(solace, 'solace/samples/js/pers/pub');
+var publisher = new GuaranteedPublisher(solace, 'solace/samples/nodejs/pers');
 // send message to Solace message router
 publisher.run(process.argv);
