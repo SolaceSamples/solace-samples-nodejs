@@ -43,7 +43,10 @@ var QueueConsumer = function (solaceModule, queueName) {
     };
 
     consumer.log('\n*** Consumer to queue "' + consumer.queueName + '" is ready to connect ***');
-
+    consumer.log('\n/*********************************************************************' +
+    '\nNOTE: Before you proceed, please ensure that the required queue is created on the Broker.' +
+    '\n/*********************************************************************')
+  
     // main function
     consumer.run = function (argv) {
         consumer.connect(argv);
@@ -131,6 +134,7 @@ var QueueConsumer = function (solaceModule, queueName) {
                         consumer.consuming = false;
                         consumer.log('=== Error: the message consumer could not bind to queue "' + consumer.queueName +
                             '" ===\n   Ensure this queue exists on the message router vpn');
+                        consumer.exit();
                     });
                     consumer.messageConsumer.on(solace.MessageConsumerEventName.DOWN, function () {
                         consumer.consuming = false;
