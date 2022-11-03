@@ -31,6 +31,7 @@ This repository contains:
     - [GuaranteedRequestor](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/GuaranteedRequestor.js)/[Replier](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/GuaranteedReplier.js): Learn how to set up guaranteed request/reply messaging.
     - [NoLocal Pub-Sub](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/NoLocalPubSub.js): Learn how to prevent messages published on a session or consumer received on that same session or consumer.
     - [Compressed Publisher](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/CompressedPublisher.js): Minor variation on the Topic Publisher tutorial: adds compression.
+    - [Flow Controlled Publisher](https://github.com/SolaceSamples/solace-samples-nodejs/blob/master/src/features/PublisherFlowControl.js): Minor variation on the Topic Publisher tutorial: adds publisher network flow control event handling.
 
 ## Checking out
 
