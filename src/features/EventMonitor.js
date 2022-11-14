@@ -58,7 +58,7 @@ var EventSubscriber = function (solaceModule) {
         subscriber.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     subscriber.connect = function (argv) {
         if (subscriber.session !== null) {
             subscriber.log('Already connected and ready to subscribe to events.');
@@ -72,12 +72,12 @@ var EventSubscriber = function (solaceModule) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        subscriber.log('Connecting to Solace message router using url: ' + hosturl);
+        subscriber.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         subscriber.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        subscriber.log('Solace message router VPN name: ' + vpn);
+        subscriber.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session
         try {
@@ -133,7 +133,7 @@ var EventSubscriber = function (solaceModule) {
         }
     };
 
-    // Subscribes to topic on Solace message router
+    // Subscribes to topic on Solace PubSub+ Event Broker
     subscriber.subscribe = function () {
         if (subscriber.session !== null) {
             if (subscriber.subscribed) {
@@ -154,7 +154,7 @@ var EventSubscriber = function (solaceModule) {
                 }
             }
         } else {
-            subscriber.log('Cannot subscribe because not connected to Solace message router.');
+            subscriber.log('Cannot subscribe because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -166,7 +166,7 @@ var EventSubscriber = function (solaceModule) {
         }, 1000); // wait for 1 second to finish
     };
 
-    // Unsubscribes from topic on Solace message router
+    // Unsubscribes from topic on Solace PubSub+ Event Broker
     subscriber.unsubscribe = function () {
         if (subscriber.session !== null) {
             if (subscriber.subscribed) {
@@ -185,13 +185,13 @@ var EventSubscriber = function (solaceModule) {
                 subscriber.log('Cannot unsubscribe because not subscribed to the topic "' + subscriber.topicName + '"');
             }
         } else {
-            subscriber.log('Cannot unsubscribe because not connected to Solace message router.');
+            subscriber.log('Cannot unsubscribe because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     subscriber.disconnect = function () {
-        subscriber.log('Disconnecting from Solace message router...');
+        subscriber.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (subscriber.session !== null) {
             try {
                 subscriber.session.disconnect();
@@ -199,7 +199,7 @@ var EventSubscriber = function (solaceModule) {
                 subscriber.log(error.toString());
             }
         } else {
-            subscriber.log('Not connected to Solace message router.');
+            subscriber.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -220,7 +220,7 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the subscriber, specifying the name of the event topic
 var subscriber = new EventSubscriber(solace);
 
-// subscribe to messages on Solace message router
+// subscribe to messages on Solace PubSub+ Event Broker
 subscriber.run(process.argv);
 
 // wait to be told to exit

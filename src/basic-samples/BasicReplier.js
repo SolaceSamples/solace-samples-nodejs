@@ -48,7 +48,7 @@ var BasicReplier = function (solaceModule, topicName) {
         replier.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     replier.connect = function (argv) {
         if (replier.session !== null) {
             replier.log('Already connected and ready to ready to receive requests.');
@@ -62,12 +62,12 @@ var BasicReplier = function (solaceModule, topicName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        replier.log('Connecting to Solace message router using url: ' + hosturl);
+        replier.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         replier.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        replier.log('Solace message router VPN name: ' + vpn);
+        replier.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session
         try {
@@ -127,7 +127,7 @@ var BasicReplier = function (solaceModule, topicName) {
         }
     };
 
-    // Subscribes to request topic on Solace message router
+    // Subscribes to request topic on Solace PubSub+ Event Broker
     replier.subscribe = function () {
         if (replier.session !== null) {
             if (replier.subscribed) {
@@ -146,11 +146,11 @@ var BasicReplier = function (solaceModule, topicName) {
                 }
             }
         } else {
-            replier.log('Cannot subscribe because not connected to Solace message router.');
+            replier.log('Cannot subscribe because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
-    // Unsubscribes from request topic on Solace message router
+    // Unsubscribes from request topic on Solace PubSub+ Event Broker
     replier.unsubscribe = function () {
         if (replier.session !== null) {
             if (replier.subscribed) {
@@ -167,7 +167,7 @@ var BasicReplier = function (solaceModule, topicName) {
                 }
             }
         } else {
-            replier.log('Cannot unsubscribe because not connected to Solace message router.');
+            replier.log('Cannot unsubscribe because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -184,13 +184,13 @@ var BasicReplier = function (solaceModule, topicName) {
                 replier.log('Replied.');
             }
         } else {
-            replier.log('Cannot reply: not connected to Solace message router.');
+            replier.log('Cannot reply: not connected to Solace PubSub+ Event Broker.');
         }
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     replier.disconnect = function () {
-        replier.log('Disconnecting from Solace message router...');
+        replier.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (replier.session !== null) {
             try {
                 replier.session.disconnect();
@@ -198,7 +198,7 @@ var BasicReplier = function (solaceModule, topicName) {
                 replier.log(error.toString());
             }
         } else {
-            replier.log('Not connected to Solace message router.');
+            replier.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -229,7 +229,7 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the replier, specifying the name of the request topic
 var replier = new BasicReplier(solace, 'tutorial/topic');
 
-// reply to messages on Solace message router
+// reply to messages on Solace PubSub+ Event Broker
 replier.run(process.argv);
 
 // wait to be told to exit

@@ -48,7 +48,7 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
         publisher.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     publisher.connect = function (argv) {
         if (publisher.session !== null) {
             publisher.log('Already connected and ready to publish messages.');
@@ -62,12 +62,12 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        publisher.log('Connecting to Solace message router using url: ' + hosturl);
+        publisher.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         publisher.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        publisher.log('Solace message router VPN name: ' + vpn);
+        publisher.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
 
         // create session
@@ -132,7 +132,8 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
             var message = solace.SolclientFactory.createMessage();
             message.setBinaryAttachment(messageText);
             message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
-            // Define a correlation key object
+            // OPTIONAL: You can set a correlation key on the message and check for the correlation
+            // in the ACKNOWLEDGE_MESSAGE callback. Define a correlation key object
             const correlationKey = {
                 name: "MESSAGE_CORRELATIONKEY",
                 id: Date.now()
@@ -149,7 +150,7 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
                 publisher.log(error.toString());
             }
         } else {
-            publisher.log('Cannot publish messages because not connected to Solace message router.');
+            publisher.log('Cannot publish messages because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -160,9 +161,9 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
         }, 1000); // wait for 1 second to finish
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     publisher.disconnect = function () {
-        publisher.log('Disconnecting from Solace message router...');
+        publisher.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (publisher.session !== null) {
             try {
                 publisher.session.disconnect();
@@ -170,7 +171,7 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
                 publisher.log(error.toString());
             }
         } else {
-            publisher.log('Not connected to Solace message router.');
+            publisher.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -191,5 +192,5 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the publisher, specifying the name of the destination topic
 var publisher = new GuaranteedPublisher(solace, 'solace/samples/nodejs/pers');
-// send message to Solace message router
+// send message to Solace PubSub+ Event Broker
 publisher.run(process.argv);

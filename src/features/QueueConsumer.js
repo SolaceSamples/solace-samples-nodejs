@@ -44,15 +44,15 @@ var QueueConsumer = function (solaceModule, queueName) {
 
     consumer.log('\n*** Consumer to queue "' + consumer.queueName + '" is ready to connect ***');
     consumer.log('\n/*********************************************************************' +
-    '\nNOTE: Before you proceed, please ensure that the required queue is created on the message router vpn.' +
-    '\n/*********************************************************************')
+                  '\nNOTE: Ensure that the queue with appropriate subscription is created on the Broker.' +
+                  '\n/*********************************************************************')
   
     // main function
     consumer.run = function (argv) {
         consumer.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     consumer.connect = function (argv) {
         if (consumer.session !== null) {
             consumer.log('Already connected and ready to consume messages.');
@@ -66,12 +66,12 @@ var QueueConsumer = function (solaceModule, queueName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        consumer.log('Connecting to Solace message router using url: ' + hosturl);
+        consumer.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         consumer.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        consumer.log('Solace message router VPN name: ' + vpn);
+        consumer.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session
         try {
@@ -110,7 +110,7 @@ var QueueConsumer = function (solaceModule, queueName) {
         }
     };
 
-    // Starts consuming from a queue on Solace message router
+    // Starts consuming from a queue on Solace PubSub+ Event Broker
     consumer.startConsume = function () {
         if (consumer.session !== null) {
             if (consumer.consuming) {
@@ -158,7 +158,7 @@ var QueueConsumer = function (solaceModule, queueName) {
                 }
             }
         } else {
-            consumer.log('Cannot start the queue consumer because not connected to Solace message router.');
+            consumer.log('Cannot start the queue consumer because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -170,7 +170,7 @@ var QueueConsumer = function (solaceModule, queueName) {
         }, 1000); // wait for 1 second to finish
     };
 
-    // Disconnects the consumer from queue on Solace message router
+    // Disconnects the consumer from queue on Solace PubSub+ Event Broker
     consumer.stopConsume = function () {
         if (consumer.session !== null) {
             if (consumer.consuming) {
@@ -187,13 +187,13 @@ var QueueConsumer = function (solaceModule, queueName) {
                     consumer.queueName + '"');
             }
         } else {
-            consumer.log('Cannot disconnect the consumer because not connected to Solace message router.');
+            consumer.log('Cannot disconnect the consumer because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     consumer.disconnect = function () {
-        consumer.log('Disconnecting from Solace message router...');
+        consumer.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (consumer.session !== null) {
             try {
                 consumer.session.disconnect();
@@ -201,7 +201,7 @@ var QueueConsumer = function (solaceModule, queueName) {
                 consumer.log(error.toString());
             }
         } else {
-            consumer.log('Not connected to Solace message router.');
+            consumer.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -222,7 +222,7 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the consumer, specifying the name of the queue
 var consumer = new QueueConsumer(solace, 'tutorial/queue');
 
-// subscribe to messages on Solace message router
+// subscribe to messages on Solace PubSub+ Event Broker
 consumer.run(process.argv);
 
 // wait to be told to exit
