@@ -43,9 +43,6 @@ var QueueConsumer = function (solaceModule, queueName) {
     };
 
     consumer.log('\n*** Consumer to queue "' + consumer.queueName + '" is ready to connect ***');
-    consumer.log('\n/*********************************************************************' +
-                  '\nNOTE: Ensure that the queue with appropriate subscription is created on the Broker.' +
-                  '\n/*********************************************************************')
   
     // main function
     consumer.run = function (argv) {

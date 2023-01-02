@@ -42,9 +42,6 @@ var QueueProducer = function (solaceModule, queueName) {
   };
 
   producer.log('\n*** Producer to queue "' + producer.queueName + '" is ready to connect ***');
-  producer.log('\n/*********************************************************************' +
-                '\nNOTE: Before you proceed, please ensure that the required queue is created on the message router vpn.' +
-                '\n/********************************************************************/')
 
   // main function
   producer.run = function (argv) {

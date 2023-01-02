@@ -26,7 +26,7 @@
 /*jslint es6 browser devel:true*/
 /*global solace*/
 
-var GuaranteedSubscriber = function (solaceModule, queueName) {
+var GuaranteedSubscriber = function (solaceModule, queueName, topicName) {
     'use strict';
     var solace = solaceModule;
     var subscriber = {};
@@ -34,6 +34,8 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
     subscriber.flow = null;
     subscriber.queueName = queueName;
     subscriber.consuming = false;
+    subscriber.topicName = topicName;
+    subscriber.subscribed = false;
 
     // Logger
     subscriber.log = function (line) {
@@ -104,7 +106,6 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
                 subscriber.session = null;
             }
         });
-
         subscriber.connectToSolace();   
     };
 
@@ -133,6 +134,7 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
                     });
                     // Define message subscriber event listeners
                     subscriber.messageSubscriber.on(solace.MessageConsumerEventName.UP, function () {
+                        subscriber.subscribe();
                         subscriber.consuming = true;
                         subscriber.log('=== Ready to receive messages. ===');
                     });
@@ -149,6 +151,19 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
                     subscriber.messageSubscriber.on(solace.MessageConsumerEventName.DOWN_ERROR, function () {
                         subscriber.consuming = false;
                         subscriber.log('=== An error happened, the message subscriber is down ===');
+                    });
+                    subscriber.messageSubscriber.on(solace.MessageConsumerEventName.SUBSCRIPTION_ERROR, function (sessionEvent) {
+                      subscriber.log('Cannot subscribe to topic ' + sessionEvent.reason);
+                    });
+                    subscriber.messageSubscriber.on(solace.MessageConsumerEventName.SUBSCRIPTION_OK, function (sessionEvent) {
+                      if (subscriber.subscribed) {
+                        subscriber.subscribed = false;
+                        subscriber.log('Successfully unsubscribed from topic: ' + sessionEvent.correlationKey);
+                      } else {
+                        subscriber.subscribed = true;
+                        subscriber.log('Successfully subscribed to topic: ' + sessionEvent.correlationKey);
+                        subscriber.log('=== Ready to receive messages. ===');
+                      }
                     });
                     // Define message received event listener
                     subscriber.messageSubscriber.on(solace.MessageConsumerEventName.MESSAGE, function (message) {
@@ -168,12 +183,36 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
         }
     };
 
+    // Subscribes to topic on Solace PubSub+ Event Broker
+    subscriber.subscribe = function () {
+      if (subscriber.messageSubscriber !== null) {
+        if (subscriber.subscribed) {
+          subscriber.log('Already subscribed to "' + subscriber.topicName
+              + '" and ready to receive messages.');
+        } else {
+          subscriber.log('Subscribing to topic: ' + subscriber.topicName);
+          try {
+            subscriber.messageSubscriber.addSubscription(
+              solace.SolclientFactory.createTopicDestination(subscriber.topicName),
+              subscriber.topicName, // correlation key as topic name
+              10000 // 10 seconds timeout for this operation
+            );
+          } catch (error) {
+            subscriber.log(error.toString());
+          }
+        }
+      } else {
+        subscriber.log('Cannot subscribe because not connected to Solace PubSub+ Event Broker.');
+      }
+    };
+  
     subscriber.exit = function () {
-        subscriber.stopConsume();
-        subscriber.disconnect();
+        subscriber.unsubscribe();
         setTimeout(function () {
-            process.exit();
-        }, 1000); // wait for 1 second to finish
+          subscriber.stopConsume();
+          subscriber.disconnect();
+          process.exit();
+        }, 1000); // wait for 1 second to get confirmation on removeSubscription
     };
 
     // Disconnects the subscriber from queue on Solace PubSub+ Event Broker
@@ -195,6 +234,29 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
         } else {
             subscriber.log('Cannot disconnect the subscriber because not connected to Solace PubSub+ Event Broker.');
         }
+    };
+
+    // Unsubscribes from topic on Solace PubSub+ Event Broker
+    subscriber.unsubscribe = function () {
+      if (subscriber.session !== null) {
+        if (subscriber.subscribed) {
+          subscriber.log('Unsubscribing from topic: ' + subscriber.topicName);
+          try {
+            subscriber.messageSubscriber.removeSubscription(
+              solace.SolclientFactory.createTopicDestination(subscriber.topicName),
+              subscriber.topicName, // correlation key as topic name
+              10000 // 10 seconds timeout for this operation
+            );
+          } catch (error) {
+            subscriber.log(error.toString());
+          }
+        } else {
+          subscriber.log('Cannot unsubscribe because not subscribed to the topic "'
+              + subscriber.topicName + '"');
+        }
+      } else {
+        subscriber.log('Cannot unsubscribe because not connected to Solace PubSub+ Event Broker.');
+      }
     };
 
     // Gracefully disconnects from Solace PubSub+ Event Broker
@@ -232,7 +294,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the consumer, specifying the name of the queue
-var subscriber = new GuaranteedSubscriber(solace, 'tutorial/queue');
+var subscriber = new GuaranteedSubscriber(solace, 'tutorial/queue', 'solace/samples/nodejs/pers/>');
 
 // subscribe to messages on Solace PubSub+ Event Broker
 subscriber.run(process.argv);
