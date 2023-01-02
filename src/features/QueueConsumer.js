@@ -124,6 +124,7 @@ var QueueConsumer = function (solaceModule, queueName) {
                         // solace.MessageConsumerProperties
                         queueDescriptor: { name: consumer.queueName, type: solace.QueueType.QUEUE },
                         acknowledgeMode: solace.MessageConsumerAcknowledgeMode.CLIENT, // Enabling Client ack
+                        createIfMissing: true // Create queue if not exists
                     });
                     // Define message consumer event listeners
                     consumer.messageConsumer.on(solace.MessageConsumerEventName.UP, function () {

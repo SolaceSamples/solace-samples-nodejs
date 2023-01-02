@@ -45,10 +45,6 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
     };
 
     subscriber.log('\n*** Consumer to queue "' + subscriber.queueName + '" is ready to connect ***');
-    subscriber.log('\n/*********************************************************************' +
-                    '\nNOTE: Before you proceed, please ensure that the required queue with ' +
-                    '\nappropriate subscription is created on the Broker.' +
-                    '\n/********************************************************************/')
 
     // main function
     subscriber.run = function (argv) {
@@ -133,6 +129,7 @@ var GuaranteedSubscriber = function (solaceModule, queueName) {
                         // solace.MessageConsumerProperties
                         queueDescriptor: { name: subscriber.queueName, type: solace.QueueType.QUEUE },
                         acknowledgeMode: solace.MessageConsumerAcknowledgeMode.CLIENT, // Enabling Client ack
+                        createIfMissing: true // Create queue if not exists
                     });
                     // Define message subscriber event listeners
                     subscriber.messageSubscriber.on(solace.MessageConsumerEventName.UP, function () {

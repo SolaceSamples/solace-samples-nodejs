@@ -133,7 +133,8 @@ var DTEConsumer = function (solaceModule, topicEndpointName, topicName) {
                         queueDescriptor: { name: consumer.topicEndpointName, type: solace.QueueType.TOPIC_ENDPOINT },
                         // Not setting acknowledgeMode so it will default to ‘AUTO’ and therefore the on(MESSAGE)
                         // listener does not have to call acknowledge.
-                    });
+                        createIfMissing: true // Create topic endpoint if not exists
+                      });
                     // Define message consumer event listeners
                     consumer.messageConsumer.on(solace.MessageConsumerEventName.UP, function () {
                         consumer.consuming = true;
