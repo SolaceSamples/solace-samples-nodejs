@@ -26,7 +26,7 @@
 /*jslint es6 browser devel:true*/
 /*global solace*/
 
-var GuaranteedPublisher = function (solaceModule, topicName) {
+var GuaranteedPublisher = function (topicName) {
     'use strict';
     var publisher = {};
     publisher.session = null;
@@ -40,8 +40,6 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
         var timestamp = '[' + time.join(':') + '] ';
         console.log(timestamp + line);
     };
-
-    publisher.log('\n*** publisher to topic "' + publisher.topicName + '/*" is ready to connect ***');
 
     // main function
     publisher.run = function (argv) {
@@ -61,6 +59,9 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
                 'Available protocols are ws://, wss://, http://, https://, tcp://, tcps://');
             process.exit();
         }
+
+        publisher.log('*** publisher to topic "' + publisher.topicName + '" is ready to connect ***');
+
         var hosturl = argv.slice(2)[0];
         publisher.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
@@ -102,12 +103,12 @@ var GuaranteedPublisher = function (solaceModule, topicName) {
             }
         });
         publisher.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, function (sessionEvent) {
-            publisher.log('Delivery of message with correlation key = ' +
+            publisher.log('Delivery of message to PubSub+ Broker with correlation key = ' +
                 sessionEvent.correlationKey.id + ' confirmed.');
             publisher.exit();
         });
         publisher.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, function (sessionEvent) {
-            publisher.log('Delivery of message with correlation key = ' +
+            publisher.log('Delivery of message to PubSub+ Broker with correlation key = ' +
                 sessionEvent.correlationKey.id + ' rejected, info: ' + sessionEvent.infoStr);
             publisher.exit();
         });
@@ -191,6 +192,6 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the publisher, specifying the name of the destination topic
-var publisher = new GuaranteedPublisher(solace, 'solace/samples/nodejs/pers');
+var publisher = new GuaranteedPublisher('solace/samples/nodejs/pers');
 // send message to Solace PubSub+ Event Broker
 publisher.run(process.argv);

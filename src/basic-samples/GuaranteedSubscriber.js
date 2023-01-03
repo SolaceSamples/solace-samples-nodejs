@@ -26,9 +26,8 @@
 /*jslint es6 browser devel:true*/
 /*global solace*/
 
-var GuaranteedSubscriber = function (solaceModule, queueName, topicName) {
+var GuaranteedSubscriber = function (queueName, topicName) {
     'use strict';
-    var solace = solaceModule;
     var subscriber = {};
     subscriber.session = null;
     subscriber.flow = null;
@@ -46,7 +45,7 @@ var GuaranteedSubscriber = function (solaceModule, queueName, topicName) {
         console.log(timestamp + line);
     };
 
-    subscriber.log('\n*** Consumer to queue "' + subscriber.queueName + '" is ready to connect ***');
+    subscriber.log('*** Consumer to queue "' + subscriber.queueName + '" is ready to connect ***');
 
     // main function
     subscriber.run = function (argv) {
@@ -264,7 +263,9 @@ var GuaranteedSubscriber = function (solaceModule, queueName, topicName) {
         subscriber.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (subscriber.session !== null) {
             try {
-                subscriber.session.disconnect();
+                setTimeout(function () {
+                    subscriber.session.disconnect();
+                }, 1000); // wait for 1 second to get confirmation on removeSubscription
             } catch (error) {
                 subscriber.log(error.toString());
             }
@@ -272,11 +273,6 @@ var GuaranteedSubscriber = function (solaceModule, queueName, topicName) {
             subscriber.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
-
-    subscriber.clear = function () {
-      subscriber.log('Clearing log messages...');
-      document.getElementById('log').value = "";
-    }
 
     return subscriber;
 };
@@ -294,7 +290,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the consumer, specifying the name of the queue
-var subscriber = new GuaranteedSubscriber(solace, 'tutorial/queue', 'solace/samples/nodejs/pers/>');
+var subscriber = new GuaranteedSubscriber('tutorial/queue', 'solace/samples/nodejs/pers/>');
 
 // subscribe to messages on Solace PubSub+ Event Broker
 subscriber.run(process.argv);
