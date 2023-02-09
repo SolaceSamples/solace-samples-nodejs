@@ -59,7 +59,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
         replier.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     replier.connect = function (argv) {
         if (replier.session !== null) {
             replier.log('Already connected and ready to subscribe to request topic.');
@@ -73,12 +73,12 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        replier.log('Connecting to Solace message router using url: ' + hosturl);
+        replier.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         replier.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        replier.log('Solace message router VPN name: ' + vpn);
+        replier.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];        // create session
         try {
             replier.session = solace.SolclientFactory.createSession({
@@ -116,7 +116,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
         }
     };
 
-    // Subscribes to temporary topic endpoint on Solace message router
+    // Subscribes to temporary topic endpoint on Solace PubSub+ Event Broker
     replier.startService = function () {
         if (replier.session !== null) {
             if (replier.active) {
@@ -143,7 +143,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
                 }
             }
         } else {
-            replier.log('Cannot start replier because not connected to Solace message router.');
+            replier.log('Cannot start replier because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -165,7 +165,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
             }
             replier.log('Replied.');
         } else {
-            replier.log('Cannot reply: not connected to Solace message router.');
+            replier.log('Cannot reply: not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -177,7 +177,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
         }, 2000); // wait for 2 seconds to finish
     };
 
-    // Stops the replier service on Solace message router
+    // Stops the replier service on Solace PubSub+ Event Broker
     replier.stopService = function () {
         if (replier.session !== null) {
             if (replier.active) {
@@ -194,13 +194,13 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
                     replier.requestTopicName + '"');
             }
         } else {
-            replier.log('Cannot stop replier because not connected to Solace message router.');
+            replier.log('Cannot stop replier because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     replier.disconnect = function () {
-        replier.log('Disconnecting from Solace message router...');
+        replier.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (replier.session !== null) {
             try {
                 replier.session.disconnect();
@@ -210,7 +210,7 @@ var GuaranteedReplier = function (solaceModule, requestTopicName) {
                 replier.log(error.toString());
             }
         } else {
-            replier.log('Not connected to Solace message router.');
+            replier.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -231,7 +231,7 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the replier, specifying the name of the request topic endpoint
 var replier = new GuaranteedReplier(solace, 'tutorial/requesttopic');
 
-// reply to messages on Solace message router
+// reply to messages on Solace PubSub+ Event Broker
 replier.run(process.argv);
 
 // wait to be told to exit

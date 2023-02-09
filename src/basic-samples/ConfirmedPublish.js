@@ -50,7 +50,7 @@ var QueueProducer = function (solaceModule, queueName) {
         producer.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     producer.connect = function (argv) {
         if (producer.session !== null) {
             producer.log('Already connected and ready to publish.');
@@ -64,12 +64,12 @@ var QueueProducer = function (solaceModule, queueName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        producer.log('Connecting to Solace message router using url: ' + hosturl);
+        producer.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         producer.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        producer.log('Solace message router VPN name: ' + vpn);
+        producer.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session
         try {
@@ -132,7 +132,7 @@ var QueueProducer = function (solaceModule, queueName) {
                 producer.sendMessage(i);
             }
         } else {
-            producer.log('Cannot send messages because not connected to Solace message router.');
+            producer.log('Cannot send messages because not connected to Solace PubSub+ Event Broker.');
         }
     }
 
@@ -164,9 +164,9 @@ var QueueProducer = function (solaceModule, queueName) {
         }, 1000); // wait for 1 second to finish
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     producer.disconnect = function () {
-        producer.log('Disconnecting from Solace message router...');
+        producer.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (producer.session !== null) {
             try {
                 producer.session.disconnect();
@@ -174,7 +174,7 @@ var QueueProducer = function (solaceModule, queueName) {
                 producer.log(error.toString());
             }
         } else {
-            producer.log('Not connected to Solace message router.');
+            producer.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -195,5 +195,5 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the producer, specifying the name of the destination queue
 var producer = new QueueProducer(solace, 'tutorial/queue');
 
-// send message to Solace message router
+// send message to Solace PubSub+ Event Broker
 producer.run(process.argv);

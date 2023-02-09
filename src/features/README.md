@@ -1,6 +1,6 @@
 # Solace Node.js API advanced samples
 
-This directory contains code showing how to make use of advanced features of the Solace message router.
+This directory contains code showing how to make use of advanced features of the Solace PubSub+ Event Broker.
 
 The code requires Node.js API version 10 or later.
 

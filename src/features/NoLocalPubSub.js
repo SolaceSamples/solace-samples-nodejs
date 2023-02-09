@@ -63,7 +63,7 @@ var NoLocalPubSub = function (solaceModule, topicName) {
         sample.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     sample.connect = function (argv) {
         if (sample.session1 !== null) {
             sample.log('Already connected and ready to start demo.');
@@ -77,12 +77,12 @@ var NoLocalPubSub = function (solaceModule, topicName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        sample.log('Connecting to Solace message router using url: ' + hosturl);
+        sample.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         sample.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        sample.log('Solace message router VPN name: ' + vpn);
+        sample.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session properties
         var sessionProperties = new solace.SessionProperties({
@@ -226,9 +226,9 @@ var NoLocalPubSub = function (solaceModule, topicName) {
         }, 1000); // wait for 1 second to finish
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     sample.disconnect = function () {
-        sample.log('Disconnecting both sessions from Solace message router...');
+        sample.log('Disconnecting both sessions from Solace PubSub+ Event Broker...');
         [sample.session1, sample.session2].forEach(function(session) {
             if (session && session !== null) {
                 try {
@@ -257,7 +257,7 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the consumer, specifying the name of the DTE and the topic
 var demo = new NoLocalPubSub(solace, 'tutorial/topic');
 
-// subscribe to messages on Solace message router
+// subscribe to messages on Solace PubSub+ Event Broker
 demo.run(process.argv);
 
 process.on('SIGINT', function () {
