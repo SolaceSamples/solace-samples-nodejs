@@ -31,7 +31,9 @@ var QueueProducer = function (solaceModule, queueName) {
     var producer = {};
     producer.session = null;
     producer.queueName = queueName;
-    producer.numOfMessages = 10;
+    // send a lot of messages without stopping
+    // when we hit an "OperationError: Guaranteed Message Window Closed" error
+    producer.numOfMessages = 100000;
     producer.messageAckRecvd = 0;
 
     // Logger
@@ -126,18 +128,8 @@ var QueueProducer = function (solaceModule, queueName) {
         }
     };
 
-    producer.sendMessages = function () {
-        if (producer.session !== null) {
-            for (var i = 1; i <= producer.numOfMessages; i++) {
-                producer.sendMessage(i);
-            }
-        } else {
-            producer.log('Cannot send messages because not connected to Solace PubSub+ Event Broker.');
-        }
-    }
-
-    // Sends one message
-    producer.sendMessage = function (sequenceNr) {
+    // Create a message
+    producer.getMessage = function (sequenceNr) {
         var messageText = 'Sample Message';
         var message = solace.SolclientFactory.createMessage();
         message.setDestination(solace.SolclientFactory.createDurableQueueDestination(producer.queueName));
@@ -149,9 +141,43 @@ var QueueProducer = function (solaceModule, queueName) {
             id: sequenceNr,
         };
         message.setCorrelationKey(correlationKey);
+        return message; // return the message
+    };
+
+    // Send many message
+    producer.sendMessages = function () {
+        if (producer.session !== null) {
+            var sentCount = 0;
+            const doSend = () => {
+                try {
+                    producer.log(`Starting send at: ${sentCount}`);
+                    while (sentCount < producer.numOfMessages) {
+                        var sequenceNr = sentCount + 1;
+                        var message = producer.getMessage(sequenceNr);
+                        producer.session.send(message);
+                        producer.log('Message #' + sequenceNr + ' sent to queue "' + producer.queueName + '", correlation key = ' + JSON.stringify(message.getCorrelationKey()));
+                        ++sentCount;
+                    }
+                } catch (error) {
+                    producer.log(`Aborting send at: ${sentCount}`);
+                    producer.log(error.toString());
+                    producer.session.once(solace.SessionEventCode.CAN_ACCEPT_DATA, () => {
+                        doSend();
+                    });
+                }
+              };
+              doSend();
+        } else {
+            producer.log('Cannot send messages because not connected to Solace PubSub+ Event Broker.');
+        }
+    }
+
+    // Sends one message
+    producer.sendMessage = function (sequenceNr) {
+        var message = producer.getMessage(sequenceNr);
         try {
             producer.session.send(message);
-            producer.log('Message #' + sequenceNr + ' sent to queue "' + producer.queueName + '", correlation key = ' + JSON.stringify(correlationKey));
+            producer.log('Message #' + sequenceNr + ' sent to queue "' + producer.queueName + '", correlation key = ' + JSON.stringify(message.getCorrelationKey()));
         } catch (error) {
             producer.log(error.toString());
         }
