@@ -128,8 +128,8 @@ var QueueProducer = function (solaceModule, queueName) {
         }
     };
 
-    // Create a message
-    producer.getMessage = function (sequenceNr) {
+    // Builds a message
+    producer.buildMessage = function (sequenceNr) {
         var messageText = 'Sample Message';
         var message = solace.SolclientFactory.createMessage();
         message.setDestination(solace.SolclientFactory.createDurableQueueDestination(producer.queueName));
@@ -153,7 +153,7 @@ var QueueProducer = function (solaceModule, queueName) {
                     producer.log(`Starting send at: ${sentCount}`);
                     while (sentCount < producer.numOfMessages) {
                         var sequenceNr = sentCount + 1;
-                        var message = producer.getMessage(sequenceNr);
+                        var message = producer.buildMessage(sequenceNr);
                         producer.session.send(message);
                         producer.log('Message #' + sequenceNr + ' sent to queue "' + producer.queueName + '", correlation key = ' + JSON.stringify(message.getCorrelationKey()));
                         ++sentCount;
@@ -172,9 +172,10 @@ var QueueProducer = function (solaceModule, queueName) {
         }
     }
 
-    // Sends one message
+    // Sends one message - this function is currently not being used anywhere in this example
+    // only keeping it here for reference as an example to send a single message
     producer.sendMessage = function (sequenceNr) {
-        var message = producer.getMessage(sequenceNr);
+        var message = producer.buildMessage(sequenceNr);
         try {
             producer.session.send(message);
             producer.log('Message #' + sequenceNr + ' sent to queue "' + producer.queueName + '", correlation key = ' + JSON.stringify(message.getCorrelationKey()));
