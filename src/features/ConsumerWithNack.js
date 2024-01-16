@@ -62,8 +62,8 @@ var ConsumerWithNack = function (solaceModule, queueName) {
             return;
         }
         // extract params
-        if (argv.length < (2 + 4)) { // expecting 4 real arguments
-            consumer.log('Cannot connect: expecting all arguments' +
+        if (argv.length < (2 + 3)) { // expecting at least 3 real arguments (password is optional)
+            consumer.log('Cannot connect: expecting at least 3 arguments (Password is Optional)' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password> <message-settlement-outcome>.\n' +
                 'Available protocols are ws://, wss://, http://, https://, tcp://, tcps:// \n' +
                 'Available Message settlement outcomes are: --accepted, --failed, --rejected, --any');
@@ -81,7 +81,7 @@ var ConsumerWithNack = function (solaceModule, queueName) {
         var isSettlementOutcome = argv.slice(5)[0];
 
         var pass = null;
-        var outcome = null;
+        var outcome = ""; // default is an empty string
 
         var settlementOpts = ['--accepted', '--failed', '--rejected', '--any'];
         // is settlement outcome passed as 4th argument ? or 5th ?
