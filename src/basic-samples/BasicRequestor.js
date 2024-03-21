@@ -47,7 +47,7 @@ var BasicRequestor = function (solaceModule, topicName) {
         requestor.connect(argv);
     };
 
-    // Establishes connection to Solace message router
+    // Establishes connection to Solace PubSub+ Event Broker
     requestor.connect = function (argv) {
         if (requestor.session !== null) {
             requestor.log('Already connected and ready to send requests.');
@@ -61,12 +61,12 @@ var BasicRequestor = function (solaceModule, topicName) {
             process.exit();
         }
         var hosturl = argv.slice(2)[0];
-        requestor.log('Connecting to Solace message router using url: ' + hosturl);
+        requestor.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
         var username = usernamevpn.split('@')[0];
         requestor.log('Client username: ' + username);
         var vpn = usernamevpn.split('@')[1];
-        requestor.log('Solace message router VPN name: ' + vpn);
+        requestor.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
         // create session
         try {
@@ -129,7 +129,7 @@ var BasicRequestor = function (solaceModule, topicName) {
                 requestor.log(error.toString());
             }
         } else {
-            requestor.log('Cannot send request because not connected to Solace message router.');
+            requestor.log('Cannot send request because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -146,9 +146,9 @@ var BasicRequestor = function (solaceModule, topicName) {
         requestor.exit();
     };
 
-    // Gracefully disconnects from Solace message router
+    // Gracefully disconnects from Solace PubSub+ Event Broker
     requestor.disconnect = function () {
-        requestor.log('Disconnecting from Solace message router...');
+        requestor.log('Disconnecting from Solace PubSub+ Event Broker...');
         if (requestor.session !== null) {
             try {
                 requestor.session.disconnect();
@@ -156,7 +156,7 @@ var BasicRequestor = function (solaceModule, topicName) {
                 requestor.log(error.toString());
             }
         } else {
-            requestor.log('Not connected to Solace message router.');
+            requestor.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
@@ -184,5 +184,5 @@ solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 // create the requestor, specifying the name of the request topic
 var requestor = new BasicRequestor(solace, 'tutorial/topic');
 
-// send request to Solace message router
+// send request to Solace PubSub+ Event Broker
 requestor.run(process.argv);

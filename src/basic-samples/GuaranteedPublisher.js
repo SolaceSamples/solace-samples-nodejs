@@ -18,30 +18,16 @@
  */
 
 /**
- * Solace Systems Node.js API
- * Publish/Subscribe tutorial - Compressed Publisher
- *
- * Minor variation on the Topic Publisher tutorial: adds compression.
- *
- * Compression is compatible with tcp and tcps.
- * Available zlib compression levels are 1-9,
- * setting the compressionLevel to 0 disables compression.
- * 
- * Compressed tcp uses a separate port, by default 55003.
- * The API uses the right default, so it is simplest not to override
- * unless the router uses non-standard ports.
- *
- * Compressed tcps uses the regular tcps port, by default 55443.
- * Compression is perfomed before encryption,
- * so this combination should not be used in environments
- * open to Chosen Plaintext Attacks.
+ * Solace Web Messaging API for JavaScript
+ * Publishing Guaranteed messages on a Topic tutorial - Guaranteed publisher
+ * Demonstrates sending persistent messages on a topic
  */
 
-/*jslint es6 node:true devel:true*/
+/*jslint es6 browser devel:true*/
+/*global solace*/
 
-var CompressedPublisher = function (solaceModule, topicName) {
+var GuaranteedPublisher = function (topicName) {
     'use strict';
-    var solace = solaceModule;
     var publisher = {};
     publisher.session = null;
     publisher.topicName = topicName;
@@ -55,8 +41,6 @@ var CompressedPublisher = function (solaceModule, topicName) {
         console.log(timestamp + line);
     };
 
-    publisher.log('\n*** Publisher to topic "' + publisher.topicName + '" is ready to connect ***');
-
     // main function
     publisher.run = function (argv) {
         publisher.connect(argv);
@@ -65,16 +49,19 @@ var CompressedPublisher = function (solaceModule, topicName) {
     // Establishes connection to Solace PubSub+ Event Broker
     publisher.connect = function (argv) {
         if (publisher.session !== null) {
-            publisher.log('Already connected and ready to publish.');
+            publisher.log('Already connected and ready to publish messages.');
             return;
         }
         // extract params
         if (argv.length < (2 + 3)) { // expecting 3 real arguments
             publisher.log('Cannot connect: expecting all arguments' +
                 ' <protocol://host[:port]> <client-username>@<message-vpn> <client-password>.\n' +
-                'Available protocols are tcp:// and tcps://');
+                'Available protocols are ws://, wss://, http://, https://, tcp://, tcps://');
             process.exit();
         }
+
+        publisher.log('*** publisher to topic "' + publisher.topicName + '" is ready to connect ***');
+
         var hosturl = argv.slice(2)[0];
         publisher.log('Connecting to Solace PubSub+ Event Broker using url: ' + hosturl);
         var usernamevpn = argv.slice(3)[0];
@@ -83,6 +70,7 @@ var CompressedPublisher = function (solaceModule, topicName) {
         var vpn = usernamevpn.split('@')[1];
         publisher.log('Solace PubSub+ Event Broker VPN name: ' + vpn);
         var pass = argv.slice(4)[0];
+
         // create session
         try {
             publisher.session = solace.SolclientFactory.createSession({
@@ -91,9 +79,9 @@ var CompressedPublisher = function (solaceModule, topicName) {
                 vpnName:  vpn,
                 userName: username,
                 password: pass,
-                sslValidateCertificate: false,
-                // Enables maximum compression.
-                compressionLevel: 9
+                publisherProperties: {
+                  acknowledgeMode: solace.MessagePublisherAcknowledgeMode.PER_MESSAGE,
+              }          
             });
         } catch (error) {
             publisher.log(error.toString());
@@ -102,7 +90,6 @@ var CompressedPublisher = function (solaceModule, topicName) {
         publisher.session.on(solace.SessionEventCode.UP_NOTICE, function (sessionEvent) {
             publisher.log('=== Successfully connected and ready to publish messages. ===');
             publisher.publish();
-            publisher.exit();
         });
         publisher.session.on(solace.SessionEventCode.CONNECT_FAILED_ERROR, function (sessionEvent) {
             publisher.log('Connection failed to the message router: ' + sessionEvent.infoStr +
@@ -115,7 +102,23 @@ var CompressedPublisher = function (solaceModule, topicName) {
                 publisher.session = null;
             }
         });
-        // connect the session
+        publisher.session.on(solace.SessionEventCode.ACKNOWLEDGED_MESSAGE, function (sessionEvent) {
+            publisher.log('Delivery of message to PubSub+ Broker with correlation key = ' +
+                sessionEvent.correlationKey.id + ' confirmed.');
+            publisher.exit();
+        });
+        publisher.session.on(solace.SessionEventCode.REJECTED_MESSAGE_ERROR, function (sessionEvent) {
+            publisher.log('Delivery of message to PubSub+ Broker with correlation key = ' +
+                sessionEvent.correlationKey.id + ' rejected, info: ' + sessionEvent.infoStr);
+            publisher.exit();
+        });
+
+        publisher.connectToSolace();   
+
+    };
+
+    // Actually connects the session triggered when the iframe has been loaded - see in html code
+    publisher.connectToSolace = function () {
         try {
             publisher.session.connect();
         } catch (error) {
@@ -123,28 +126,37 @@ var CompressedPublisher = function (solaceModule, topicName) {
         }
     };
 
-    // Publishes one message
+    // Publish one message
     publisher.publish = function () {
         if (publisher.session !== null) {
             var messageText = 'Sample Message';
             var message = solace.SolclientFactory.createMessage();
-            message.setDestination(solace.SolclientFactory.createTopicDestination(publisher.topicName));
             message.setBinaryAttachment(messageText);
-            message.setDeliveryMode(solace.MessageDeliveryModeType.DIRECT);
-            publisher.log('Publishing message "' + messageText + '" to topic "' + publisher.topicName + '"...');
+            message.setDeliveryMode(solace.MessageDeliveryModeType.PERSISTENT);
+            // OPTIONAL: You can set a correlation key on the message and check for the correlation
+            // in the ACKNOWLEDGE_MESSAGE callback. Define a correlation key object
+            const correlationKey = {
+                name: "MESSAGE_CORRELATIONKEY",
+                id: Date.now()
+            };
+            message.setCorrelationKey(correlationKey);
+            publisher.log('Publishing message "' + messageText + '" to topic "' + publisher.topicName + '/' + correlationKey.id + '"...');
+            message.setDestination(solace.SolclientFactory.createTopicDestination(publisher.topicName + '/' + correlationKey.id));
+
             try {
+                // Delivery not yet confirmed. See ConfirmedPublish.js
                 publisher.session.send(message);
-                publisher.log('Message published.');
+                publisher.log('Message sent with correlation key: ' + correlationKey.id);
             } catch (error) {
                 publisher.log(error.toString());
             }
         } else {
-            publisher.log('Cannot publish because not connected to Solace PubSub+ Event Broker.');
+            publisher.log('Cannot publish messages because not connected to Solace PubSub+ Event Broker.');
         }
     };
 
     publisher.exit = function () {
-        publisher.disconnect();
+      publisher.disconnect();
         setTimeout(function () {
             process.exit();
         }, 1000); // wait for 1 second to finish
@@ -167,6 +179,7 @@ var CompressedPublisher = function (solaceModule, topicName) {
     return publisher;
 };
 
+
 var solace = require('solclientjs').debug; // logging supported
 
 // Initialize factory with the most recent API defaults
@@ -178,8 +191,7 @@ solace.SolclientFactory.init(factoryProps);
 // NOTICE: works only with ('solclientjs').debug
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
-// create the publisher, specifying the name of the subscription topic
-var publisher = new CompressedPublisher(solace, 'tutorial/topic');
-
-// publish message to Solace PubSub+ Event Broker
+// create the publisher, specifying the name of the destination topic
+var publisher = new GuaranteedPublisher('solace/samples/nodejs/pers');
+// send message to Solace PubSub+ Event Broker
 publisher.run(process.argv);
