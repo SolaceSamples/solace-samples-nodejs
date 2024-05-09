@@ -8,7 +8,7 @@ The "Getting Started" tutorials will get you up to speed and sending messages wi
 - Follow [these instructions](https://docs.solace.com/Solace-SW-Broker-Set-Up/Setting-Up-SW-Brokers.htm) to start the Solace VMR in leading Clouds, Container Platforms or Hypervisors. The tutorials outline where to download and how to install the Solace VMR.
 - If your company has Solace PubSub+ Event Brokers deployed, contact your middleware team to obtain the host name or IP address of a Solace PubSub+ Event Broker to test against, a username and password to access it, and a VPN in which you can produce and consume messages.
 
-## Contents
+## Content
 
 This repository contains:
 
