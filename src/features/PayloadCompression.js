@@ -62,6 +62,11 @@ const session = solace.SolclientFactory.createSession({
   userName: username,
   password: pass,
   sslValidateCertificate: false,
+  // zlib compression level 1-9, or 0 for no compression.
+  // 1: fastest compression
+  // 9: most thorough compression
+  // 0: No payload comppression on outgoing messages,
+  //   but incoming payload-compressed messages are transparently decompred just the same.
   payloadCompressionLevel: 9,
 });
 
