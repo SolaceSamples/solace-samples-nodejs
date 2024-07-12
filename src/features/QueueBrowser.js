@@ -197,7 +197,7 @@ var QueueBrowser = function (solaceModule, queueName) {
                 browser.log(error.toString());
             }
         } else {
-            browser.log('Notf connected to Solace PubSub+ Event Broker.');
+            browser.log('Not connected to Solace PubSub+ Event Broker.');
         }
     };
 
