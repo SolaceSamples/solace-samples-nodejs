@@ -119,7 +119,7 @@ var QueueBrowser = function (solaceModule, queueName) {
                 try {
                     // Create a message browser
                     browser.messageBrowser = browser.session.createQueueBrowser({
-                        queueDescriptor: { name: 'Q.DCC.IM.Triage', type: solace.QueueType.QUEUE }
+                        queueDescriptor: { name: browser.queueName, type: solace.QueueType.QUEUE }
                     });
                     // Define message browser event listeners
                     browser.messageBrowser.on(solace.QueueBrowserEventName.UP, function () {
