@@ -20,7 +20,7 @@
 /**
  * Solace Systems Node.js API
  * Persistence with Queues tutorial - Queue browser
- * Demonstrates receiving persistent messages from a queue
+ * Demonstrates the use of a queue browser flow to look at guaranteed messages spooled on a queue and selectively remove messages as needed.
  */
 
 /*jslint es6 node:true devel:true*/
@@ -143,9 +143,8 @@ var QueueBrowser = function (solaceModule, queueName) {
                     // Define message received event listener
                     browser.messageBrowser.on(solace.QueueBrowserEventName.MESSAGE, function (message) {
                         browser.log('Received message: ' + message.getGuaranteedMessageId());
+                        // Store the message so that we may explicitly remove it from the queue at a later point in time.
                         browser.messages[message.getGuaranteedMessageId()] = message;
-                        // Need to explicitly ack otherwise it will not be deleted from the message router
-                        // message.acknowledge();
                     });
                     // Connect the message browser
                     browser.messageBrowser.connect();
@@ -228,7 +227,7 @@ solace.SolclientFactory.init(factoryProps);
 solace.SolclientFactory.setLogLevel(solace.LogLevel.WARN);
 
 // create the browser, specifying the name of the queue
-var browser = new QueueBrowser(solace, 'tutorial/queue');
+var browser = new QueueBrowser(solace, 'TEST');
 
 // subscribe to messages on Solace PubSub+ Event Broker
 browser.run(process.argv);
