@@ -140,9 +140,9 @@ var QueueBrowser = function (solaceModule, queueName) {
                         browser.consuming = false;
                         browser.log('=== An error happened, the message browser is down ===');
                     });
-                    // Define message received event listener
+                    // Define message browsed event listener
                     browser.messageBrowser.on(solace.QueueBrowserEventName.MESSAGE, function (message) {
-                        browser.log('Received message: ' + message.getGuaranteedMessageId());
+                        browser.log('Browsed message: ' + 'Message Id: ' + message.getGuaranteedMessageId() + "\n Message Details:\n" + message.dump());
                         // Store the message so that we may explicitly remove it from the queue at a later point in time.
                         browser.messages[message.getGuaranteedMessageId()] = message;
                     });
