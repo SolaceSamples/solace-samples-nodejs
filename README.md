@@ -51,22 +51,25 @@ These samples depend on version 10 or later of the Solace Node.js API library.
 
 The library can be installed from the `npmjs` central repository using the `package.json` specs.
 
-For a local installation of the API package, run from the current `solace-samples-nodejs` directory.
+For a local installation of the API package, run from the current `solace-samples-nodejs` directory:
 
-**Recommended (with security protections):**
 ```bash
-npm install --ignore-scripts
+npm ci
 ```
 
-If you need to run package scripts (verify package trustworthiness first):
+⚠️ **Common Mistake - DON'T do this:**
 ```bash
-npm install
+npm install  # Can modify package-lock.json unpredictably
+# or
+npm i        # Same issue
 ```
 
-**For CI/production environments:**
-```bash
-npm ci --ignore-scripts
-```
+**Why `npm ci` is safer:**
+- Strictly uses package-lock.json (no version guessing)
+- Deletes and re-downloads from scratch every time
+- Errors immediately if package-lock.json is incomplete
+- Deterministic and auditable (same as CI/CD pipelines)
+- Lifecycle scripts are blocked by default via `.npmrc`
 
 ## Running the Samples
 
@@ -85,20 +88,28 @@ See the [tutorials](https://tutorials.solace.dev/nodejs) for more details.
 When working with this repository, follow these security guidelines:
 
 ### Dependency Management
-- Always verify the lockfile matches package.json: `npm ci --ignore-scripts`
+- Always use `npm ci` to install dependencies (never `npm install` or `npm i`)
 - Regularly check for vulnerabilities: `npm audit`
 - Check for outdated packages: `npm outdated`
 - Review the [OWASP NPM Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/NPM_Security_Cheat_Sheet.html)
 
 ### Installation Safety
 - This repository is configured to ignore lifecycle scripts by default (via `.npmrc`)
-- Only run `npm install` without `--ignore-scripts` if you've verified package integrity
+- Use `npm ci` for reproducible, auditable installations
 - Before installing, verify package authenticity: `npm info solclientjs`
+- Never commit `node_modules/` to version control
+
+### Adding New Dependencies
+- Always specify exact versions: `npm install package@1.2.3`
+- Never use bare package names: ~~`npm install package`~~ ❌
+- After adding packages, commit both `package.json` and `package-lock.json`
+- Team members run `npm ci` to get the same versions
 
 ### For Contributors
 - Run `npm audit` before submitting pull requests
 - Do not commit secrets, API keys, or credentials to version control
 - Keep dependencies up to date and address security advisories promptly
+- Use `npm ci` in your local workflow and CI/CD pipelines
 
 ## Contributing
 

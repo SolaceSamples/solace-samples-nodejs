@@ -56,13 +56,24 @@ npm audit
 npm outdated
 
 # Verify lockfile integrity
-npm ci --ignore-scripts
+npm ci
+```
+
+**If adding new dependencies:**
+```sh
+# Always specify exact versions to prevent typosquatting
+npm install package@1.2.3
+
+# Then commit both files
+git add package.json package-lock.json
 ```
 
 If `npm audit` reports vulnerabilities:
 - For high/critical vulnerabilities in direct dependencies: update the package
 - For vulnerabilities in transitive dependencies: check if updating the direct dependency resolves it
 - Document any accepted risks in your pull request
+
+**Important:** Never use `npm install` or `npm i` without a specific version. Always use `npm ci` for installing existing dependencies.
 
 #### Step 3: Commit
 
