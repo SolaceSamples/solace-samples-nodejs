@@ -44,6 +44,26 @@ Make your changes on a new git branch in your fork of the repository.
 git checkout -b my-fix-branch master
 ```
 
+#### Step 2.5: Security Checks
+
+Before committing your changes, run these security checks:
+
+```sh
+# Check for known vulnerabilities
+npm audit
+
+# Ensure dependencies are up to date
+npm outdated
+
+# Verify lockfile integrity
+npm ci --ignore-scripts
+```
+
+If `npm audit` reports vulnerabilities:
+- For high/critical vulnerabilities in direct dependencies: update the package
+- For vulnerabilities in transitive dependencies: check if updating the direct dependency resolves it
+- Document any accepted risks in your pull request
+
 #### Step 3: Commit
 
 Commit your changes using a descriptive commit message.
